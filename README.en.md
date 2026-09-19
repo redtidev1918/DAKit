@@ -90,11 +90,12 @@ Before running any sign-in, download, or diagnostics flow:
 | --- | --- | --- |
 | `dakit_core` | Models, errors, repository contracts, pagination, diagnostics, transfer contracts | none |
 | `dakit_api` | OAuth PKCE, network config, connectivity checks, official API implementation | none |
+| `dakit_web` | Private web protocol adapters (Wix, `_puppy/init`, WebDeviationMapper) | none |
 | `dakit_flutter` | System browser, deep links, secure storage, background transfers | yes |
 | `dakit_cli` | Pure-Dart CLI for sign-in, downloads, and diagnostics | none |
 | `example_client` | Android/macOS/Windows integration and diagnostics client | app |
 
-Dependency direction is fixed: `dakit_flutter → dakit_api → dakit_core`.
+Dependency direction is fixed: `dakit_flutter → dakit_api → dakit_core`; `dakit_cli` may additionally use `dakit_web → dakit_core`.
 Business apps depend only on the layer they need; use `dakit_flutter` for full
 Flutter integration.
 

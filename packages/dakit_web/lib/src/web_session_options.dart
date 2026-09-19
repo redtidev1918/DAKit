@@ -13,7 +13,7 @@ Options webSessionOptions(String cookieHeader) => Options(
   responseType: ResponseType.json,
   headers: <String, dynamic>{
     'Accept': 'application/json',
-    'Cookie': cookieHeader,
+    if (cookieHeader.isNotEmpty) 'Cookie': cookieHeader,
     'User-Agent': webUserAgent,
   },
 );

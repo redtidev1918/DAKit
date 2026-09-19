@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:dakit_api/dakit_api.dart';
 import 'package:dakit_core/dakit_core.dart';
+import 'package:dakit_web/dakit_web.dart';
 import 'package:dio/dio.dart';
 import 'package:test/test.dart';
 
@@ -82,7 +82,6 @@ Map<String, Object?> _initPayload() => <String, Object?>{
 WebDeviationClient _client(ResponseBody Function(RequestOptions) handler) {
   final dio = Dio(BaseOptions())..httpClientAdapter = _StubAdapter(handler);
   return WebDeviationClient(
-    networkProfile: NetworkProfile.direct(),
     session: WebSession.parse('auth=abc; auth_secure=def'),
     dio: dio,
   );
@@ -163,7 +162,6 @@ void main() {
           return _json(_initPayload());
         });
       final client = WebDeviationClient(
-        networkProfile: NetworkProfile.direct(),
         session: WebSession.parse('auth=topsecretvalue'),
         dio: dio,
         diagnostics: _CollectingSink(events),
