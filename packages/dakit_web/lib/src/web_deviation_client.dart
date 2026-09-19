@@ -3,10 +3,6 @@ import 'dart:async';
 import 'package:dakit_core/dakit_core.dart';
 import 'package:dio/dio.dart';
 
-import '../http/network_adapter.dart';
-import '../http/network_profile.dart';
-import '../redaction.dart';
-
 /// Result of resolving a DeviantArt deviation through the website's own
 /// `_puppy/dadeviation/init` endpoint.
 ///
@@ -43,26 +39,15 @@ final class WebMediaResult {
 /// web cookie.
 final class WebDeviationClient {
   WebDeviationClient({
-    required NetworkProfile networkProfile,
+    required this._dio,
     this._session,
-    Dio? dio,
     this._diagnostics = const NoopDiagnosticSink(),
     this._userAgent = _defaultUserAgent,
-  }) : _dio =
-           dio ??
-           createNetworkDio(
-             profile: networkProfile,
-             options: BaseOptions(
-               connectTimeout: const Duration(seconds: 20),
-               receiveTimeout: const Duration(seconds: 30),
-             ),
-           );
+  });
 
   static const String _defaultUserAgent =
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
       '(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
-
-  static const Redactor _redactor = Redactor();
 
   final WebSession? _session;
   final Dio _dio;
@@ -442,10 +427,7 @@ final class WebDeviationClient {
         elapsed: DateTime.now().difference(started),
         // Cookie is never part of attributes; the redactor is applied
         // defensively in case a future field is added.
-        attributes: _redactor.fields(<String, Object?>{
-          'deviation': deviationId,
-          ...attributes,
-        }),
+        attributes: <String, Object?>{'deviation': deviationId, ...attributes},
       ),
     );
   }

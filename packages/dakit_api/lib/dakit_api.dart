@@ -16,4 +16,3 @@ export 'src/oauth/oauth_token_client.dart';
 export 'src/oauth/pkce.dart';
 export 'src/redaction.dart';
 export 'src/repositories/official_repositories.dart';
-export 'src/repositories/web_deviation_client.dart';

@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:dakit_api/dakit_api.dart';
 import 'package:dakit_core/dakit_core.dart';
+import 'package:dakit_web/dakit_web.dart';
 import 'package:dio/dio.dart';
 
 NetworkProfile resolveNetworkProfile(
@@ -233,39 +234,21 @@ Future<String> resolveArtworkUuid({
         message: 'Could not read the DeviantArt CSRF token.',
       );
     }
-    final response = await dio.get<Object?>(
-      'https://www.deviantart.com/_puppy/dadeviation/init',
-      queryParameters: <String, Object?>{
-        'deviationid': id,
-        if (username != null && username.isNotEmpty) 'username': username,
-        // 该接口自 2026 年起把 type 列为必填枚举（art/journal），缺失返回 400。
-        'type': 'art',
-        'include_session': 'false',
-        'csrf_token': csrf,
-        'mature_content': true,
-      },
-      options: Options(
-        responseType: ResponseType.json,
-        headers: <String, dynamic>{
-          'User-Agent': _cliUserAgent,
-          'Accept': 'application/json',
-        },
-      ),
+    final init = await DeviationInitFetcher(dio).fetch(
+      deviationId: id,
+      username: username ?? '',
+      cookieHeader: '',
+      csrfToken: csrf,
     );
-    final data = response.data;
-    final deviation = data is Map ? data['deviation'] : null;
-    final extended = deviation is Map ? deviation['extended'] : null;
-    final uuid = extended is Map ? extended['deviationUuid'] : null;
-    if (uuid is! String || uuid.isEmpty) {
-      throw DAKitException(
-        kind: DAKitFailureKind.notFound,
-        code: 'web.init.no_uuid',
-        message: 'Could not resolve artwork $id to a UUID.',
-      );
-    }
-    return uuid;
+    return init.uuid;
   } on DAKitException {
     rethrow;
+  } on FormatException {
+    throw DAKitException(
+      kind: DAKitFailureKind.notFound,
+      code: 'web.init.no_uuid',
+      message: 'Could not resolve artwork $id to a UUID.',
+    );
   } on Object catch (error) {
     throw DAKitException(
       kind: DAKitFailureKind.network,
@@ -304,7 +287,13 @@ Future<WebMediaResult?> resolveWebMedia({
 }) async {
   if (id.isEmpty || _uuidPattern.hasMatch(id)) return null;
   final client = WebDeviationClient(
-    networkProfile: profile,
+    dio: createNetworkDio(
+      profile: profile,
+      options: BaseOptions(
+        connectTimeout: const Duration(seconds: 20),
+        receiveTimeout: const Duration(seconds: 30),
+      ),
+    ),
     session: webSession,
     diagnostics: diagnostics,
     userAgent: _webUserAgent,
