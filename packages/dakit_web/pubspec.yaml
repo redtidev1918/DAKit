@@ -1,0 +1,21 @@
+name: dakit_web
+description: Optional private web compatibility adapters for the DAKit client SDK.
+version: 0.1.0
+topics:
+  - deviantart
+  - deviantart-api
+  - web
+  - http-client
+repository: https://github.com/redtidev1918/dakit/tree/main/packages/dakit_web
+resolution: workspace
+
+environment:
+  sdk: ^3.13.1
+
+dependencies:
+  dakit_core: ">=1.0.0 <2.0.0"
+  dio: ^5.11.1
+
+dev_dependencies:
+  lints: ^6.0.0
+  test: ^1.25.6
