@@ -90,7 +90,7 @@ Before running any sign-in, download, or diagnostics flow:
 | --- | --- | --- |
 | `dakit_core` | Models, errors, repository contracts, pagination, diagnostics, transfer contracts | none |
 | `dakit_api` | OAuth PKCE, network config, connectivity checks, official API implementation | none |
-| `dakit_web` | Private web protocol adapters (Wix, `_puppy/init`, WebDeviationMapper) | none |
+| `dakit_web` | Private web protocol adapters (Wix, `_puppy/init`, search/RFY/collections/gallery/profile/More Like This) | none |
 | `dakit_flutter` | System browser, deep links, secure storage, background transfers | yes |
 | `dakit_cli` | Pure-Dart CLI for sign-in, downloads, and diagnostics | none |
 | `example_client` | Android/macOS/Windows integration and diagnostics client | app |
