@@ -712,7 +712,7 @@ final class OfficialMediaRepository implements MediaRepository {
       final availability = _expectedMediaAvailability(error);
       if (availability == null) rethrow;
       return MediaAsset(
-        id: '$artworkId:original',
+        id: mediaAssetId(artworkId, MediaRole.original),
         kind: MediaKind.unknown,
         role: MediaRole.original,
         availability: availability,
