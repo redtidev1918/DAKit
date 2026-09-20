@@ -1,6 +1,6 @@
 # dakit_cli
 
-A pure-Dart command-line client for [DAKit](https://github.com/redtidev1918/dakit):
+A pure-Dart command-line client for [DAKit](https://github.com/redtidev1918/DAKit):
 sign in with the official OAuth API and download single deviations, artist
 galleries, folders, favourites, or search results, plus account and
 connectivity diagnostics. Downloads use the official API; the only web call is
@@ -10,7 +10,7 @@ resolving numeric page ids to UUIDs through the website's public
 ## Usage
 
 Download a standalone binary from
-[GitHub Releases](https://github.com/redtidev1918/dakit/releases?q=dakit_cli).
+[GitHub Releases](https://github.com/redtidev1918/DAKit/releases?q=dakit_cli).
 Linux x64/ARM64, Windows x64, and macOS Intel/Apple Silicon archives are built
 for CLI releases, with checksums. Dart and Flutter are not required at runtime.
 
@@ -84,4 +84,4 @@ For the full command list and proxy notes, see the
 [root README](../../README.en.md#command-line-client).
 
 DAKit is a community project and is not affiliated with or endorsed by
-DeviantArt. [MIT licensed](https://github.com/redtidev1918/dakit/blob/main/LICENSE).
+DeviantArt. [MIT licensed](https://github.com/redtidev1918/DAKit/blob/main/LICENSE).

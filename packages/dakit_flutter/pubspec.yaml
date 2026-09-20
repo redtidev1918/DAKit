@@ -7,7 +7,7 @@ topics:
   - flutter
   - oauth
   - downloader
-repository: https://github.com/redtidev1918/dakit/tree/main/packages/dakit_flutter
+repository: https://github.com/redtidev1918/DAKit/tree/main/packages/dakit_flutter
 resolution: workspace
 
 environment:

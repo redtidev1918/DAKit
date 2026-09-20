@@ -186,7 +186,7 @@ final RegExp _uuidPattern = RegExp(
 
 const String _cliUserAgent =
     'dakit/0.2 (command-line DeviantArt client; '
-    '+https://github.com/redtidev1918/dakit)';
+    '+https://github.com/redtidev1918/DAKit)';
 
 /// Resolves a numeric artwork id (from a web URL or fav.me link) to its UUID
 /// through the website's public `_puppy/dadeviation/init` endpoint — the same

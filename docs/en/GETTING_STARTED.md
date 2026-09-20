@@ -73,7 +73,7 @@ The example app follows the system language to display Chinese or English. It is
 ### Command-Line Client
 
 Download a standalone binary from
-[GitHub Releases](https://github.com/redtidev1918/dakit/releases?q=dakit_cli);
+[GitHub Releases](https://github.com/redtidev1918/DAKit/releases?q=dakit_cli);
 Dart and Flutter are not required. Builds cover Linux x64/ARM64, Windows x64,
 and macOS Intel/Apple Silicon. The macOS archives are explicitly marked
 unsigned previews.
@@ -93,7 +93,7 @@ artwork/journal pages, fav.me short links, galleries/folders, tag pages, and
 search URLs all route to the matching downloader, and numeric web ids resolve
 to UUIDs automatically; batch commands also accept `--archive` (skip already
 downloaded), `--filename` templates, and `--write-info-json`. See the root
-[README](https://github.com/redtidev1918/dakit/blob/main/README.en.md#command-line-client) for all commands, proxy modes,
+[README](https://github.com/redtidev1918/DAKit/blob/main/README.en.md#command-line-client) for all commands, proxy modes,
 headless login, overwrite behavior, and security notes.
 
 ## 3. Embed in a Flutter App

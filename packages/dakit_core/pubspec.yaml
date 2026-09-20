@@ -7,7 +7,7 @@ topics:
   - api-client
   - dart
   - domain-models
-repository: https://github.com/redtidev1918/dakit/tree/main/packages/dakit_core
+repository: https://github.com/redtidev1918/DAKit/tree/main/packages/dakit_core
 resolution: workspace
 
 environment:

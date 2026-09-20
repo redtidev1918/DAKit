@@ -7,7 +7,7 @@ topics:
   - oauth
   - pkce
   - http-client
-repository: https://github.com/redtidev1918/dakit/tree/main/packages/dakit_api
+repository: https://github.com/redtidev1918/DAKit/tree/main/packages/dakit_api
 resolution: workspace
 
 environment:

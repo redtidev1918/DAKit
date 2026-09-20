@@ -1,7 +1,7 @@
 # dakit_api
 
 Dart-only OAuth PKCE, networking, diagnostics, and official DeviantArt API
-adapters for [DAKit](https://github.com/redtidev1918/dakit). It maps provider
+adapters for [DAKit](https://github.com/redtidev1918/DAKit). It maps provider
 responses into `dakit_core` models and does **not** depend on Flutter.
 
 [![pub.dev](https://img.shields.io/pub/v/dakit_api?style=flat)](https://pub.dev/packages/dakit_api)
@@ -70,10 +70,10 @@ non-idempotent actions. Request `collection`, `comment.post`, `message`,
 
 ## Documentation
 
-- [Getting started](https://github.com/redtidev1918/dakit/blob/main/docs/GETTING_STARTED.md)
-- [Authentication](https://github.com/redtidev1918/dakit/blob/main/docs/AUTHENTICATION.md)
-- [Networking](https://github.com/redtidev1918/dakit/blob/main/docs/NETWORKING.md)
-- [Documentation index](https://github.com/redtidev1918/dakit/blob/main/docs/README.md)
+- [Getting started](https://github.com/redtidev1918/DAKit/blob/main/docs/GETTING_STARTED.md)
+- [Authentication](https://github.com/redtidev1918/DAKit/blob/main/docs/AUTHENTICATION.md)
+- [Networking](https://github.com/redtidev1918/DAKit/blob/main/docs/NETWORKING.md)
+- [Documentation index](https://github.com/redtidev1918/DAKit/blob/main/docs/README.md)
 
 DAKit is a community project and is not affiliated with or endorsed by
-DeviantArt. [MIT licensed](https://github.com/redtidev1918/dakit/blob/main/LICENSE).
+DeviantArt. [MIT licensed](https://github.com/redtidev1918/DAKit/blob/main/LICENSE).

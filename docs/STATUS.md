@@ -4,7 +4,7 @@
 
 ## 当前状态
 
-- 分支：`main`；远端：`https://github.com/redtidev1918/dakit.git`；
+- 分支：`main`；远端：`https://github.com/redtidev1918/DAKit.git`；
 - 产品名：DAKit — DeviantArt Client SDK；
 - 版本阶段：`dakit_core`/`dakit_api` 为 1.1.0，`dakit_flutter` 为 1.0.0，`dakit_web` 为 0.2.1，均已发布到 pub.dev；
 - 运行时：Flutter 3.47.1 / Dart 3.13.1；
@@ -62,4 +62,4 @@ flutter --version
 ./tool/verify.sh
 ```
 
-先阅读根 [README](https://github.com/redtidev1918/dakit/blob/main/README.md) 和本文。不要恢复旧 Python 实现；历史预览只保留在 Git tag `python-preview-1.0.0a1`。不要在普通 CI 或仓库中加入真实账户凭据。
+先阅读根 [README](https://github.com/redtidev1918/DAKit/blob/main/README.md) 和本文。不要恢复旧 Python 实现；历史预览只保留在 Git tag `python-preview-1.0.0a1`。不要在普通 CI 或仓库中加入真实账户凭据。

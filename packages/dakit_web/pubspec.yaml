@@ -6,7 +6,7 @@ topics:
   - deviantart-api
   - web
   - http-client
-repository: https://github.com/redtidev1918/dakit/tree/main/packages/dakit_web
+repository: https://github.com/redtidev1918/DAKit/tree/main/packages/dakit_web
 resolution: workspace
 
 environment:

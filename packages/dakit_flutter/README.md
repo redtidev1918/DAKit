@@ -1,6 +1,6 @@
 # dakit_flutter
 
-Flutter platform adapters for [DAKit](https://github.com/redtidev1918/dakit):
+Flutter platform adapters for [DAKit](https://github.com/redtidev1918/DAKit):
 a ready-to-use OAuth facade, deep links, secure storage, and native background
 transfers — without imposing screens or a state-management framework.
 
@@ -50,10 +50,10 @@ host application.
 
 ## Documentation
 
-- [Getting started](https://github.com/redtidev1918/dakit/blob/main/docs/GETTING_STARTED.md)
-- [Authentication](https://github.com/redtidev1918/dakit/blob/main/docs/AUTHENTICATION.md)
-- [Media and transfers](https://github.com/redtidev1918/dakit/blob/main/docs/MEDIA.md)
-- [Documentation index](https://github.com/redtidev1918/dakit/blob/main/docs/README.md)
+- [Getting started](https://github.com/redtidev1918/DAKit/blob/main/docs/GETTING_STARTED.md)
+- [Authentication](https://github.com/redtidev1918/DAKit/blob/main/docs/AUTHENTICATION.md)
+- [Media and transfers](https://github.com/redtidev1918/DAKit/blob/main/docs/MEDIA.md)
+- [Documentation index](https://github.com/redtidev1918/DAKit/blob/main/docs/README.md)
 
 DAKit is a community project and is not affiliated with or endorsed by
-DeviantArt. [MIT licensed](https://github.com/redtidev1918/dakit/blob/main/LICENSE).
+DeviantArt. [MIT licensed](https://github.com/redtidev1918/DAKit/blob/main/LICENSE).

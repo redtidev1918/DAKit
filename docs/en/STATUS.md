@@ -4,7 +4,7 @@ This file records only the verifiable current state and next steps, to avoid mix
 
 ## Current Status
 
-- Branch: `main`; remote: `https://github.com/redtidev1918/dakit.git`;
+- Branch: `main`; remote: `https://github.com/redtidev1918/DAKit.git`;
 - Product name: DAKit — DeviantArt Client SDK;
 - Version stage: `dakit_core`/`dakit_api` 1.1.0, `dakit_flutter` 1.0.0, and `dakit_web` 0.2.1 are published to pub.dev;
 - Runtime: Flutter 3.47.1 / Dart 3.13.1;
@@ -62,4 +62,4 @@ flutter --version
 ./tool/verify.sh
 ```
 
-First read the root [README](https://github.com/redtidev1918/dakit/blob/main/README.md) and this document. Do not restore the old Python implementation; the historical preview is kept only in the Git tag `python-preview-1.0.0a1`. Do not add real account credentials to the regular CI or the repository.
+First read the root [README](https://github.com/redtidev1918/DAKit/blob/main/README.md) and this document. Do not restore the old Python implementation; the historical preview is kept only in the Git tag `python-preview-1.0.0a1`. Do not add real account credentials to the regular CI or the repository.

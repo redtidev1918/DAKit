@@ -1,6 +1,6 @@
 # dakit_core
 
-Platform-neutral domain contracts for [DAKit](https://github.com/redtidev1918/dakit)
+Platform-neutral domain contracts for [DAKit](https://github.com/redtidev1918/DAKit)
 clients. This package has **no Flutter, HTTP, plugin, UI, state-management,
 cache, or database dependency** — it is the shared foundation that `dakit_api`
 and `dakit_flutter` build on.
@@ -42,9 +42,9 @@ public API.
 
 ## Documentation
 
-- [Getting started](https://github.com/redtidev1918/dakit/blob/main/docs/GETTING_STARTED.md)
-- [Architecture](https://github.com/redtidev1918/dakit/blob/main/docs/ARCHITECTURE.md)
-- [Documentation index](https://github.com/redtidev1918/dakit/blob/main/docs/README.md)
+- [Getting started](https://github.com/redtidev1918/DAKit/blob/main/docs/GETTING_STARTED.md)
+- [Architecture](https://github.com/redtidev1918/DAKit/blob/main/docs/ARCHITECTURE.md)
+- [Documentation index](https://github.com/redtidev1918/DAKit/blob/main/docs/README.md)
 
 DAKit is a community project and is not affiliated with or endorsed by
-DeviantArt. [MIT licensed](https://github.com/redtidev1918/dakit/blob/main/LICENSE).
+DeviantArt. [MIT licensed](https://github.com/redtidev1918/DAKit/blob/main/LICENSE).

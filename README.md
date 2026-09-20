@@ -6,18 +6,18 @@
 
 **语言 / Language:** 中文 · [English](README.en.md)
 
-[![GitHub stars](https://img.shields.io/github/stars/redtidev1918/dakit?style=flat&color=yellow)](https://github.com/redtidev1918/dakit/stargazers)
-[![GitHub license](https://img.shields.io/github/license/redtidev1918/dakit?style=flat)](LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/redtidev1918/DAKit?style=flat&color=yellow)](https://github.com/redtidev1918/DAKit/stargazers)
+[![GitHub license](https://img.shields.io/github/license/redtidev1918/DAKit?style=flat)](LICENSE)
 [![pub.dev](https://img.shields.io/pub/v/dakit_flutter?label=dakit_flutter&style=flat)](https://pub.dev/packages/dakit_flutter)
 [![pub.dev](https://img.shields.io/pub/v/dakit_api?label=dakit_api&style=flat)](https://pub.dev/packages/dakit_api)
-[![Docs](https://img.shields.io/badge/Docs-文档站点-6366f1?style=flat-square)](https://redtidev1918.github.io/dakit/)
+[![Docs](https://img.shields.io/badge/Docs-文档站点-6366f1?style=flat-square)](https://redtidev1918.github.io/DAKit/)
 [![pub.dev](https://img.shields.io/pub/v/dakit_core?label=dakit_core&style=flat)](https://pub.dev/packages/dakit_core)
 
 DAKit 是面向 Dart 与 Flutter 的模块化 DeviantArt 客户端 SDK，为 Android、macOS 与 Windows 应用提供认证、官方 API、领域模型、诊断和后台传输能力。它既可以支撑完整的第三方客户端，也可以只作为其中一个功能模块使用。
 
 本项目由社区独立维护，与 DeviantArt 没有隶属或背书关系。“DeviantArt”仅用于说明 SDK 所连接的服务。
 
-> **参考实现 / Reference app**：完整的第三方客户端 [DAViewer](https://github.com/redtidev1918/daviewer) 就是基于 DAKit 构建的 —— 因 DeviantArt 官方放弃其 App 而诞生，是查看 DAKit 实际用法的最佳范例。
+> **参考实现 / Reference app**：完整的第三方客户端 [DAViewer](https://github.com/redtidev1918/DAViewer) 就是基于 DAKit 构建的 —— 因 DeviantArt 官方放弃其 App 而诞生，是查看 DAKit 实际用法的最佳范例。
 
 ## 目录
 
@@ -105,7 +105,7 @@ dependencies:
 ## 命令行客户端
 
 不需要安装 Dart 或 Flutter。直接从
-[DAKit CLI Releases](https://github.com/redtidev1918/dakit/releases?q=dakit_cli)
+[DAKit CLI Releases](https://github.com/redtidev1918/DAKit/releases?q=dakit_cli)
 下载与系统和 CPU 对应的压缩包：Linux x64/ARM64、Windows x64、macOS
 Intel/Apple Silicon。macOS 二进制明确标记为**未签名测试版**，没有 Apple
 Developer ID 签名或公证，Gatekeeper 可能拦截首次运行。每个 Release 同时提供
@@ -247,7 +247,7 @@ DAKit 建立在以下开源项目之上：
 - **[gallery-dl](https://github.com/mikf/gallery-dl)** —— 记录了 DeviantArt 数据提取方式的下载器项目
 - **[deviantart.ts](https://www.npmjs.com/package/deviantart.ts)** —— DeviantArt API 的 TypeScript 封装，用于核对接口参数
 
-基于 DAKit 构建的完整客户端：[DAViewer](https://github.com/redtidev1918/daviewer)。
+基于 DAKit 构建的完整客户端：[DAViewer](https://github.com/redtidev1918/DAViewer)。
 
 ## 网络 / 出口要求（重要）
 

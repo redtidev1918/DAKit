@@ -4,8 +4,8 @@
   <img src="docs/icon.png" alt="DAKit" width="160" />
 </p>
 
-[![GitHub stars](https://img.shields.io/github/stars/redtidev1918/dakit?style=flat&color=yellow)](https://github.com/redtidev1918/dakit/stargazers)
-[![GitHub license](https://img.shields.io/github/license/redtidev1918/dakit?style=flat)](LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/redtidev1918/DAKit?style=flat&color=yellow)](https://github.com/redtidev1918/DAKit/stargazers)
+[![GitHub license](https://img.shields.io/github/license/redtidev1918/DAKit?style=flat)](LICENSE)
 [![pub.dev](https://img.shields.io/pub/v/dakit_flutter?label=dakit_flutter&style=flat)](https://pub.dev/packages/dakit_flutter)
 [![pub.dev](https://img.shields.io/pub/v/dakit_api?label=dakit_api&style=flat)](https://pub.dev/packages/dakit_api)
 [![pub.dev](https://img.shields.io/pub/v/dakit_core?label=dakit_core&style=flat)](https://pub.dev/packages/dakit_core)
@@ -21,7 +21,7 @@ This project is maintained independently by the community and is not affiliated
 with or endorsed by DeviantArt. "DeviantArt" is used only to name the service
 the SDK connects to.
 
-> **Reference app**: [DAViewer](https://github.com/redtidev1918/daviewer) is a
+> **Reference app**: [DAViewer](https://github.com/redtidev1918/DAViewer) is a
 > complete third-party DeviantArt client built on DAKit — born because
 > DeviantArt abandoned its official app — and is the best example of DAKit in
 > real use.
@@ -132,7 +132,7 @@ the exact callback `dakit://oauth/callback`.
 
 No Dart or Flutter installation is required. Download the archive matching your
 OS and CPU from
-[DAKit CLI Releases](https://github.com/redtidev1918/dakit/releases?q=dakit_cli):
+[DAKit CLI Releases](https://github.com/redtidev1918/DAKit/releases?q=dakit_cli):
 Linux x64/ARM64, Windows x64, or macOS Intel/Apple Silicon. macOS binaries are
 explicitly marked **unsigned previews**: they have no Apple Developer ID
 signature or notarization, so Gatekeeper can block the first launch. Every
@@ -313,7 +313,7 @@ Open-source projects referenced for API mapping and troubleshooting:
 - **[deviantart.ts](https://www.npmjs.com/package/deviantart.ts)** — a TypeScript
   DeviantArt API wrapper, used to cross-check endpoint parameters
 
-A complete client built on DAKit: [DAViewer](https://github.com/redtidev1918/daviewer).
+A complete client built on DAKit: [DAViewer](https://github.com/redtidev1918/DAViewer).
 
 ## Community
 
