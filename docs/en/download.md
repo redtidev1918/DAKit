@@ -1,6 +1,10 @@
-# 📥 Download dakit
+<!-- docsite-release-repo: redtidev1918/DAKit -->
+<!-- docsite-release-tag: dakit_cli-v0.4.1 -->
+# 📥 Download DAKit
 
 **Language / 语言:** [中文](/download.md) · English
+
+<!-- docsite: generated from redtidev1918/DAKit release dakit_cli-v0.4.1; do not edit by hand -->
 
 This page is **generated automatically** by GitHub Actions on every release and always points at the latest one.
 
@@ -15,5 +19,5 @@ This page is **generated automatically** by GitHub Actions on every release and 
 | Windows · x64 | `dakit-cli-0.4.1-windows-x64.zip` | 3.3 MB | [⬇️ Download](https://github.com/redtidev1918/DAKit/releases/download/dakit_cli-v0.4.1/dakit-cli-0.4.1-windows-x64.zip) |
 | macOS · arm64 | `dakit-cli-0.4.1-macos-arm64-unsigned-preview.tar.gz` | 3.0 MB | [⬇️ Download](https://github.com/redtidev1918/DAKit/releases/download/dakit_cli-v0.4.1/dakit-cli-0.4.1-macos-arm64-unsigned-preview.tar.gz) |
 | macOS · x64 | `dakit-cli-0.4.1-macos-x64-unsigned-preview.tar.gz` | 3.2 MB | [⬇️ Download](https://github.com/redtidev1918/DAKit/releases/download/dakit_cli-v0.4.1/dakit-cli-0.4.1-macos-x64-unsigned-preview.tar.gz) |
-| All platforms | `RELEASE-METADATA.json` | 2 KB | [⬇️ Download](https://github.com/redtidev1918/DAKit/releases/download/dakit_cli-v0.4.1/RELEASE-METADATA.json) |
-| All platforms | `SHA256SUMS` | 1 KB | [⬇️ Download](https://github.com/redtidev1918/DAKit/releases/download/dakit_cli-v0.4.1/SHA256SUMS) |
+| 通用 | `RELEASE-METADATA.json` | 2 KB | [⬇️ Download](https://github.com/redtidev1918/DAKit/releases/download/dakit_cli-v0.4.1/RELEASE-METADATA.json) |
+| 通用 | `SHA256SUMS` | 1 KB | [⬇️ Download](https://github.com/redtidev1918/DAKit/releases/download/dakit_cli-v0.4.1/SHA256SUMS) |

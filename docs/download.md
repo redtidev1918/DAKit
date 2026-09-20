@@ -1,6 +1,10 @@
-# 📥 下载 dakit
+<!-- docsite-release-repo: redtidev1918/DAKit -->
+<!-- docsite-release-tag: dakit_cli-v0.4.1 -->
+# 📥 下载 DAKit
 
 **语言 / Language:** 中文 · [English](/en/download.md)
+
+<!-- docsite: generated from redtidev1918/DAKit release dakit_cli-v0.4.1; do not edit by hand -->
 
 本页由 GitHub Actions 在每次发版时**自动更新**，始终指向最新 Release。
 
