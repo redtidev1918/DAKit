@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.1 (2026-09-20)
+
+- Require `dakit_core` 1.1.0 for the shared stable media asset IDs.
+
 ## [0.2.0](https://github.com/redtidev1918/dakit/compare/dakit_web-v0.1.0...dakit_web-v0.2.0) (2026-09-20)
 
 

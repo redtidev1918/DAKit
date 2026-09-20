@@ -3,5 +3,5 @@
   "packages/dakit_api": "1.1.0",
   "packages/dakit_flutter": "1.0.0",
   "packages/dakit_cli": "0.4.1",
-  "packages/dakit_web": "0.2.0"
+  "packages/dakit_web": "0.2.1"
 }
