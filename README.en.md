@@ -319,6 +319,24 @@ Open-source projects referenced for API mapping and troubleshooting:
 
 A complete client built on DAKit: [DAViewer](https://github.com/redtidev1918/DAViewer).
 
+## Networking / egress requirements (important)
+
+DeviantArt blocks datacenter egress IPs on the website and parts of the API (the WAF allowlists
+by egress range):
+
+- **Blocked in practice**: Cloudflare Workers (website 403, official API data plane 500),
+  Fly.io (website 403), and most cloud hosts; some hosting ranges also get 400/404 on media
+  variants (`/v1/fit|fill`).
+- **Known-good egress**: residential networks work; on a VPS, route through a proxy such as
+  clash/mihomo to an allowed egress.
+- If the website path (`_puppy/dadeviation/init` resolution, artwork pages) returns 403/400 and
+  changing UA or adding a Referer does not help, change the network egress first.
+- **Mature content**: anonymous requests only get blurred previews (`blur_*` variants);
+  unblurred originals require sign-in (OAuth or Cookie). Originals go through the official
+  `deviation/download/{uuid}` endpoint and are limited by the **free account daily download
+  quota**; over the limit returns `Free download limit reached` — fall back to the display
+  image or subscribe to Core.
+
 ## Community
 
 - [Contributing](CONTRIBUTING.md)
