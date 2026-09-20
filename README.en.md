@@ -6,6 +6,8 @@
 
 **Language / 语言:** [中文](README.md) · English
 
+**A modular DeviantArt client SDK for Dart / Flutter.**
+
 📖 Full documentation: <https://redtidev1918.github.io/DAKit/>
 
 [![GitHub stars](https://img.shields.io/github/stars/redtidev1918/DAKit?style=flat&color=yellow)](https://github.com/redtidev1918/DAKit/stargazers)
