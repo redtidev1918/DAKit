@@ -17,6 +17,7 @@ GitHub Actions uses the same Flutter version. When upgrading the toolchain, upda
 ```text
 packages/dakit_core/       platform-agnostic domain package
 packages/dakit_api/        Dart OAuth/HTTP package
+packages/dakit_web/        Flutter-free web-protocol adapter package
 packages/dakit_flutter/    Flutter platform adapter package
 packages/dakit_cli/        pure Dart command-line client
 apps/example_client/       three-platform integration client
@@ -33,7 +34,7 @@ dart pub get
 ```
 
 `tool/verify.sh` first pulls dependencies, then uses melos to run formatting,
-static analysis, and the core, api, flutter, CLI, and example-app tests.
+static analysis, and the core, api, web, CLI, and example-app tests.
 
 Finer-grained melos commands:
 
@@ -81,7 +82,7 @@ These are all integration smoke builds, not store release packages. For formal d
 
 `.github/workflows/ci.yml` runs on push, pull request, and manual triggers:
 
-- Ubuntu: formatting, analysis, 150 tests;
+- Ubuntu: formatting, analysis, and the full test suite;
 - Ubuntu: generate and upload `coverage/lcov.info`;
 - Ubuntu/Android: debug APK;
 - macOS: debug `.app`;
@@ -90,12 +91,12 @@ These are all integration smoke builds, not store release packages. For formal d
 
 Platform jobs depend on the quality job, and a new run on the same branch cancels the previous run. The regular pipeline does not store client IDs, secrets, tokens, proxy passwords, or signing credentials.
 
-Pushing a `dakit_cli-v*` tag triggers a separate pipeline that builds standalone
-Linux x64/ARM64, Windows x64, and macOS Intel/Apple Silicon CLIs. Native targets
-run version smoke tests; the cross-compiled Linux ARM64 target validates its ELF
-architecture. The pipeline then creates `SHA256SUMS` and publishes a GitHub
-Release. macOS CLI assets remain explicitly marked as unsigned previews until
-signing and notarization are configured.
+The Release workflow / ReleaseGraph builds standalone Linux x64/ARM64, Windows
+x64, and macOS Intel/Apple Silicon CLIs. Native targets run version smoke tests;
+the cross-compiled Linux ARM64 target validates its ELF architecture. The
+workflow then creates `SHA256SUMS` and publishes a GitHub Release. macOS CLI
+assets remain explicitly marked as unsigned previews until signing and
+notarization are configured.
 
 ## Package Publish Checks
 

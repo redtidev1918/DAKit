@@ -12,7 +12,7 @@ resolving numeric page ids to UUIDs through the website's public
 Download a standalone binary from
 [GitHub Releases](https://github.com/redtidev1918/dakit/releases?q=dakit_cli).
 Linux x64/ARM64, Windows x64, and macOS Intel/Apple Silicon archives are built
-for every CLI tag, with checksums. Dart and Flutter are not required at runtime.
+for CLI releases, with checksums. Dart and Flutter are not required at runtime.
 
 The macOS archives are unsigned previews without Apple Developer ID signing or
 notarization.

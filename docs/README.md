@@ -6,7 +6,7 @@
 
 ## 下载
 
-- SDK：`dakit_flutter` / `dakit_api`（[pub.dev](https://pub.dev/packages/dakit_flutter)）
+- SDK：`dakit_flutter` / `dakit_api` / `dakit_web`（[pub.dev](https://pub.dev/packages/dakit_flutter)）
 - `dakit` CLI 二进制：见 [下载页](download.md)（自动指向最新 Release）
 
 ## 用户指南

@@ -90,7 +90,7 @@ dependencies:
 ```yaml
 dependencies:
   dakit_core: ^1.1.0
-  dakit_api: ^1.0.0
+  dakit_api: ^1.1.0
 ```
 
 需要可选的私有网页协议适配时，再加上：

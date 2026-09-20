@@ -18,10 +18,12 @@ DAKit 为第三方 Flutter 客户端提供分层 SDK。公共层描述稳定的�
           ▼
      dakit_core ───────── 模型、错误、仓库、诊断、传输契约
 
-    dakit_cli ─────────── 纯 Dart 命令行 kit（依赖 api/core，不依赖 Flutter）
+    dakit_cli ─────────── 纯 Dart 命令行 kit（依赖 api/web/core，不依赖 Flutter）
+
+    dakit_web ─────────── 可选私有网页协议适配（依赖 core，不依赖 Flutter/WebView）
 ```
 
-`dakit_core` 不依赖 Flutter 或网络库；`dakit_api` 只使用 Dart 能力；`dakit_flutter` 才依赖平台插件；`dakit_cli` 是纯 Dart 的调试与批量下载工具。依赖只能向下，领域层永远不引用实现层。
+`dakit_core` 不依赖 Flutter 或网络库；`dakit_api` 只使用 Dart 能力；`dakit_flutter` 才依赖平台插件；`dakit_cli` 是纯 Dart 的调试与批量下载工具；`dakit_web` 是无 Flutter、无 WebView 的可选适配层。依赖只能向下，领域层永远不引用实现层。
 
 ## 每层职责
 
@@ -46,6 +48,12 @@ DAKit 为第三方 Flutter 客户端提供分层 SDK。公共层描述稳定的�
 DTO 不从顶层库导出。官方响应新增未知字段不应破坏解析；必需字段消失时必须抛出明确 parsing failure。
 
 `OfficialApiTransport` 提供读取扩展点，`OfficialApiMutationTransport` 额外提供统一的 URL-encoded POST。GET 会按配置退避重试 429/500/503；非幂等 POST 只会在 401 后刷新一次 token，不会自动重试可能已生效的写操作。
+
+### `dakit_web`
+
+- 可选私有网页协议适配，覆盖搜索/RFY、收藏/画廊、简介和 More Like This 等网页数据；
+- 只做“session + request → DeviantArt DTO → `dakit_core` 模型”；
+- 不依赖 Flutter 或 WebView，也不拥有登录、Cookie/CSRF 刷新或会话持久化。
 
 ### `dakit_flutter`
 
@@ -98,7 +106,7 @@ CLI 不依赖 Flutter 插件，可编译成自包含原生二进制供终端用�
 4. 接受新增字段，对缺失必需字段给出可诊断失败；
 5. 用官方 schema 派生的 fixture 做契约测试；
 6. 用可选真实服务测试发现授权、策略和 schema 漂移；
-7. 若未来加入网页兼容层，必须作为独立可选适配器，不能污染官方 API 包；
+7. 网页兼容层必须保持在独立的可选 `dakit_web` 适配器内，不能污染官方 API 包；
 8. 对易变的响应子段做宽容解析：形状漂移时降级为空（例如
    `morelikethis/preview` 的收藏集分组），不让次要数据拖垮主内容，契约测试负责暴露漂移。
 
@@ -113,4 +121,4 @@ CLI 不依赖 Flutter 插件，可编译成自包含原生二进制供终端用�
 
 ## 版本与新增功能
 
-三个包按语义化版本独立发布。新增通知、消息、提交作品等能力时，先在 core 增加最小领域契约，再在 api 实现官方适配器，最后由 Flutter/example 验证平台交互。不要直接从页面组件调用未封装 endpoint。
+公开包按语义化版本独立发布。新增通知、消息、提交作品等能力时，先在 core 增加最小领域契约，再在 api 实现官方适配器，最后由 Flutter/example 验证平台交互。不要直接从页面组件调用未封装 endpoint。

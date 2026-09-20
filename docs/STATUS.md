@@ -16,7 +16,7 @@
 - 依赖策略：已忽略 `flutter_secure_storage` 的主版本升级，直到 Android 工具链支持 `compileSdk 37`（v11 与当前 Android API 36 / AGP 9.1.0 不兼容）；
 - 未完成：有效 Public OAuth 应用下的五类真实媒体矩阵。
 
-完整 CI 覆盖 Linux 质量门（analyze / format / test）与 Android APK、macOS app、Windows/MSIX 构建；CLI tag 流水线另行覆盖五种原生二进制。本地验证全量测试通过。
+完整 CI 覆盖 Linux 质量门（analyze / format / test）与 Android APK、macOS app、Windows/MSIX 构建；Release workflow / ReleaseGraph 另行覆盖五种原生 CLI 二进制。本地验证全量测试通过。
 
 ## 已实现范围
 
@@ -32,11 +32,12 @@
 - 环境/直连/显式 HTTP 代理、自定义 Dio、DNS/TCP/TLS/HTTP 探针；
 - 原文件可用性分类，不以 preview 冒充 original；`MediaAsset.availabilityReason` 透传 provider 拒绝原因（区分「作者禁止下载」与「免费额度用完」）；
 - Flutter 后台任务恢复、进度、重试、暂停/继续/取消及独立代理；
+- 可选 `dakit_web`：无 Flutter/WebView 的私有网页协议适配；宿主提供会话并负责登录与 Cookie/CSRF；
 - 中英文示例客户端和脱敏诊断面板；
 - 纯 Dart `dakit_cli`：自动回调/手动 OAuth 登录、自动刷新与撤销会话、流式批量下载、URL 自动识别（作品/日志页、fav.me 短链、画廊/收藏夹、标签、搜索）、`--archive` 跳过、`--filename` 模板与 `--write-info-json`、账户与连通性诊断，并发布五种架构的独立二进制；
 - CLI `--verbose` 脱敏诊断输出，以及示例客户端内置 Debug console；
 - Android 自定义 scheme、macOS URL type、Windows MSIX 协议激活；
-- 三包 MIT 许可证、package README/changelog 与可发布归档。
+- 已发布包的 MIT 许可证、package README/changelog 与可发布归档。
 - refresh/logout/token exchange 具备 generation guard，迟到操作不能在退出后恢复会话；主动取消登录会立即结束回调等待。
 
 ## 已验证的登录链路

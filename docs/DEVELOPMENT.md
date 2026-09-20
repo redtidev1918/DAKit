@@ -17,6 +17,7 @@ GitHub Actions 使用同一 Flutter 版本。升级工具链时，应在一个�
 ```text
 packages/dakit_core/       平台无关领域包
 packages/dakit_api/        Dart OAuth/HTTP 包
+packages/dakit_web/        无 Flutter 的网页协议适配包
 packages/dakit_flutter/    Flutter 平台适配包
 packages/dakit_cli/        纯 Dart 命令行客户端
 apps/example_client/       三平台集成客户端
@@ -33,7 +34,7 @@ dart pub get
 ```
 
 `tool/verify.sh` 会先拉取依赖，再通过 melos 依次检查格式、静态分析，并运行
-core、api、flutter、CLI 与示例应用测试。
+core、api、web、CLI 与示例应用测试。
 
 更细粒度的 melos 命令：
 
@@ -83,7 +84,7 @@ dart run msix:create --build-windows false --install-certificate false
 
 `.github/workflows/ci.yml` 在 push、pull request 和手动触发时执行：
 
-- Ubuntu：格式、分析、150 个测试；
+- Ubuntu：格式、分析与全量测试；
 - Ubuntu：生成并上传 `coverage/lcov.info`；
 - Ubuntu/Android：debug APK；
 - macOS：debug `.app`；
@@ -92,8 +93,8 @@ dart run msix:create --build-windows false --install-certificate false
 
 平台 job 依赖质量 job，同一分支的新运行会取消旧运行。普通流水线不保存 client ID、secret、token、代理密码或签名凭据。
 
-推送 `dakit_cli-v*` tag 时，独立流水线会构建 Linux x64/ARM64、Windows x64、
-macOS Intel/Apple Silicon 的自包含 CLI；原生目标执行版本 smoke test，交叉编译的
+Release workflow / ReleaseGraph 会构建 Linux x64/ARM64、Windows x64、macOS
+Intel/Apple Silicon 的自包含 CLI；原生目标执行版本 smoke test，交叉编译的
 Linux ARM64 验证 ELF 架构，随后生成 `SHA256SUMS` 并创建 GitHub Release。macOS
 CLI 在签名和公证落地前必须标为未签名测试版。
 
