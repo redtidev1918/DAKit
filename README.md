@@ -25,6 +25,7 @@ DAKit 是面向 Dart 与 Flutter 的模块化 DeviantArt 客户端 SDK，为 And
 
 - [能做什么](#能做什么)
 - [开始前准备](#开始前准备)
+- [网络 / 出口要求（重要）](#网络--出口要求重要)
 - [包结构](#包结构)
 - [安装](#安装)
 - [命令行客户端](#命令行客户端)
@@ -63,6 +64,15 @@ DAKit 是面向 Dart 与 Flutter 的模块化 DeviantArt 客户端 SDK，为 And
   - 命令行客户端：`http://127.0.0.1:8765/callback`
 - 登录需要 `client_id`；下载可直接传作品网页链接、fav.me 短链或裸 UUID——
   `dakit url` 会把网页链接里的数字编号自动解析为 UUID。
+
+## 网络 / 出口要求（重要）
+
+DeviantArt 会封锁「数据中心出口 IP」的网页与部分接口（WAF 按出口 IP 段放行）：
+
+- **实测被拦**：Cloudflare Workers（网页 403、官方 API 数据面 500）、Fly.io（网页 403）及多数云主机；部分机房 IP 访问媒体变体（`/v1/fit|fill`）也返回 400/404。
+- **可用的出口**：住宅网络实测全部正常；云服务器建议经 clash/mihomo 等代理走放行出口。
+- 若网页端（`_puppy/dadeviation/init` 解析、作品页抓取）出现 403/400 且换 UA、加 Referer 无效，请先更换网络出口排查。
+- **成熟 / NSFW**：匿名只能拿到打码预览（`blur_*` 变体），未打码原图需要登录（OAuth 或 Cookie）；原图走官方 `deviation/download/{uuid}`，受**免费账号每日下载额度**限制，超限返回 `Free download limit reached`，可降级取展示图或订阅 Core。
 
 ## 包结构
 
@@ -250,15 +260,6 @@ DAKit 建立在以下开源项目之上：
 - **[deviantart.ts](https://www.npmjs.com/package/deviantart.ts)** —— DeviantArt API 的 TypeScript 封装，用于核对接口参数
 
 基于 DAKit 构建的完整客户端：[DAViewer](https://github.com/redtidev1918/DAViewer)。
-
-## 网络 / 出口要求（重要）
-
-DeviantArt 会封锁「数据中心出口 IP」的网页与部分接口（WAF 按出口 IP 段放行）：
-
-- **实测被拦**：Cloudflare Workers（网页 403、官方 API 数据面 500）、Fly.io（网页 403）及多数云主机；部分机房 IP 访问媒体变体（`/v1/fit|fill`）也返回 400/404。
-- **可用的出口**：住宅网络实测全部正常；云服务器建议经 clash/mihomo 等代理走放行出口。
-- 若网页端（`_puppy/dadeviation/init` 解析、作品页抓取）出现 403/400 且换 UA、加 Referer 无效，请先更换网络出口排查。
-- **成熟 / NSFW**：匿名只能拿到打码预览（`blur_*` 变体），未打码原图需要登录（OAuth 或 Cookie）；原图走官方 `deviation/download/{uuid}`，受**免费账号每日下载额度**限制，超限返回 `Free download limit reached`，可降级取展示图或订阅 Core。
 
 ## 社区 / Community
 

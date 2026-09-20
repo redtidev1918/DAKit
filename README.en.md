@@ -34,6 +34,7 @@ the SDK connects to.
 
 - [What it can do](#what-it-can-do)
 - [Before you start](#before-you-start)
+- [Networking / egress requirements (important)](#networking--egress-requirements-important)
 - [Package layout](#package-layout)
 - [Install](#install)
 - [Command-line client](#command-line-client)
@@ -87,6 +88,24 @@ Before running any sign-in, download, or diagnostics flow:
   - CLI: `http://127.0.0.1:8765/callback`
 - Sign-in needs a `client_id`; downloads also need an artwork UUID (not the
   slug/numeric id in a web URL).
+
+## Networking / egress requirements (important)
+
+DeviantArt blocks datacenter egress IPs on the website and parts of the API (the WAF allowlists
+by egress range):
+
+- **Blocked in practice**: Cloudflare Workers (website 403, official API data plane 500),
+  Fly.io (website 403), and most cloud hosts; some hosting ranges also get 400/404 on media
+  variants (`/v1/fit|fill`).
+- **Known-good egress**: residential networks work; on a VPS, route through a proxy such as
+  clash/mihomo to an allowed egress.
+- If the website path (`_puppy/dadeviation/init` resolution, artwork pages) returns 403/400 and
+  changing UA or adding a Referer does not help, change the network egress first.
+- **Mature content**: anonymous requests only get blurred previews (`blur_*` variants);
+  unblurred originals require sign-in (OAuth or Cookie). Originals go through the official
+  `deviation/download/{uuid}` endpoint and are limited by the **free account daily download
+  quota**; over the limit returns `Free download limit reached` — fall back to the display
+  image or subscribe to Core.
 
 ## Package layout
 
@@ -318,24 +337,6 @@ Open-source projects referenced for API mapping and troubleshooting:
   DeviantArt API wrapper, used to cross-check endpoint parameters
 
 A complete client built on DAKit: [DAViewer](https://github.com/redtidev1918/DAViewer).
-
-## Networking / egress requirements (important)
-
-DeviantArt blocks datacenter egress IPs on the website and parts of the API (the WAF allowlists
-by egress range):
-
-- **Blocked in practice**: Cloudflare Workers (website 403, official API data plane 500),
-  Fly.io (website 403), and most cloud hosts; some hosting ranges also get 400/404 on media
-  variants (`/v1/fit|fill`).
-- **Known-good egress**: residential networks work; on a VPS, route through a proxy such as
-  clash/mihomo to an allowed egress.
-- If the website path (`_puppy/dadeviation/init` resolution, artwork pages) returns 403/400 and
-  changing UA or adding a Referer does not help, change the network egress first.
-- **Mature content**: anonymous requests only get blurred previews (`blur_*` variants);
-  unblurred originals require sign-in (OAuth or Cookie). Originals go through the official
-  `deviation/download/{uuid}` endpoint and are limited by the **free account daily download
-  quota**; over the limit returns `Free download limit reached` — fall back to the display
-  image or subscribe to Core.
 
 ## Community
 
