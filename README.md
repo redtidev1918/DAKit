@@ -89,8 +89,15 @@ dependencies:
 
 ```yaml
 dependencies:
-  dakit_core: ^1.0.0
+  dakit_core: ^1.1.0
   dakit_api: ^1.0.0
+```
+
+需要可选的私有网页协议适配时，再加上：
+
+```yaml
+dependencies:
+  dakit_web: ^0.2.1
 ```
 
 随后阅读[开始使用](docs/GETTING_STARTED.md)。直接在移动端或桌面端运行内置登录流程时，需要注册 **Public** OAuth 应用，并配置精确回调地址 `dakit://oauth/callback`。

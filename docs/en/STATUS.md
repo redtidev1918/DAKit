@@ -6,17 +6,17 @@ This file records only the verifiable current state and next steps, to avoid mix
 
 - Branch: `main`; remote: `https://github.com/redtidev1918/dakit.git`;
 - Product name: DAKit — DeviantArt Client SDK;
-- Version stage: `dakit_core`, `dakit_api`, and `dakit_flutter` are all 1.0.0, published to pub.dev;
+- Version stage: `dakit_core`/`dakit_api` 1.1.0, `dakit_flutter` 1.0.0, and `dakit_web` 0.2.1 are published to pub.dev;
 - Runtime: Flutter 3.47.1 / Dart 3.13.1;
 - Platforms: Android, macOS, Windows/MSIX;
-- Tests: formatting and analysis pass, 150 tests pass;
+- Tests: formatting and analysis pass, and the full test suite passes;
 - Local builds: Android debug APK and macOS debug app pass;
 - CI: the Linux quality gate and the four Android/macOS/Windows jobs pass;
-- Package publishing: `dakit_core`, `dakit_api`, and `dakit_flutter` 1.0.0 have been successfully uploaded to pub.dev (verified via both paths: GitHub Actions OIDC automated publishing and local manual publishing);
+- Package publishing: `dakit_core`/`dakit_api` 1.1.0, `dakit_flutter` 1.0.0, and `dakit_web` 0.2.1 are confirmed on pub.dev. Release publishing compares the local pubspec version with the pub.dev latest version.
 - Dependency policy: the major upgrade of `flutter_secure_storage` is being ignored until the Android toolchain supports `compileSdk 37` (v11 is incompatible with the current Android API 36 / AGP 9.1.0);
 - Not done: the five-category real media matrix under a valid Public OAuth application.
 
-Full CI covers the Linux quality gate (analyze / format / test) and the Android APK, macOS app, and Windows/MSIX builds; the CLI tag pipeline separately covers five native binaries. All 150 tests pass locally.
+Full CI covers the Linux quality gate (analyze / format / test) and the Android APK, macOS app, and Windows/MSIX builds; the CLI tag pipeline separately covers five native binaries. The full test suite passes locally.
 
 ## Implemented Scope
 

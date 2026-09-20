@@ -104,12 +104,13 @@ Run from a clean commit:
 ```shell
 dart pub publish --dry-run --directory packages/dakit_core
 dart pub publish --dry-run --directory packages/dakit_api
+dart pub publish --dry-run --directory packages/dakit_web
 flutter pub publish --dry-run --directory packages/dakit_flutter
 ```
 
-The publish order is core → api → flutter. Before a formal release, confirm the
-repository links, version dependencies, and changelogs. Current versions are
-all 1.0.0; see
+The publish order is core → api → web → flutter. Before a formal release, confirm the
+repository links, version dependencies, and changelogs. `dakit_core`/`dakit_api`
+are 1.1.0 and `dakit_web` is 0.2.1; see
 [RELEASING.md](RELEASING.md) for the full workflow.
 
 ## Commit Discipline

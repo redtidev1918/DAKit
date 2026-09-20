@@ -104,12 +104,13 @@ CLI 在签名和公证落地前必须标为未签名测试版。
 ```shell
 dart pub publish --dry-run --directory packages/dakit_core
 dart pub publish --dry-run --directory packages/dakit_api
+dart pub publish --dry-run --directory packages/dakit_web
 flutter pub publish --dry-run --directory packages/dakit_flutter
 ```
 
-发布顺序为 core → api → flutter。正式发布前还需确认 repository 链接、版本依赖和
-changelog 一致。当前版本均为 1.0.0，完整
-发布流程见 [RELEASING.md](RELEASING.md)。
+发布顺序为 core → api → web → flutter。正式发布前还需确认 repository 链接、版本依赖和
+changelog 一致。当前 `dakit_core`/`dakit_api` 为 1.1.0，`dakit_web` 为 0.2.1，
+完整发布流程见 [RELEASING.md](RELEASING.md)。
 
 ## 提交纪律
 
