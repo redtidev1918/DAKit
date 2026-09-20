@@ -1,6 +1,6 @@
 name: dakit_web
 description: Optional private web compatibility adapters for the DAKit client SDK.
-version: 0.2.0
+version: 0.2.1
 topics:
   - deviantart
   - deviantart-api
@@ -13,7 +13,7 @@ environment:
   sdk: ^3.13.1
 
 dependencies:
-  dakit_core: ">=1.0.0 <2.0.0"
+  dakit_core: "^1.1.0"
   dio: ^5.11.1
 
 dev_dependencies:
