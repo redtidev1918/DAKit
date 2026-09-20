@@ -81,4 +81,5 @@ melos:
         dart pub publish --dry-run --directory packages/dakit_core
         dart pub publish --dry-run --directory packages/dakit_api
         dart pub publish --dry-run --directory packages/dakit_flutter
+        dart pub publish --dry-run --directory packages/dakit_web
       description: Dry-run publishing for the public packages.

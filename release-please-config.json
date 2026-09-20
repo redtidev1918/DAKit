@@ -37,6 +37,15 @@
       "include-component-in-tag": true,
       "tag-separator": "-",
       "skip-github-release": true
+    },
+    "packages/dakit_web": {
+      "release-type": "dart",
+      "package-name": "dakit_web",
+      "component": "dakit_web",
+      "include-v-in-tag": true,
+      "include-component-in-tag": true,
+      "tag-separator": "-",
+      "skip-github-release": true
     }
   }
 }

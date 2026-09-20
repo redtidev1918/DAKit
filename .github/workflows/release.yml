@@ -59,3 +59,12 @@ jobs:
       working-directory: packages/dakit_flutter
     permissions:
       id-token: write
+
+  pub-web:
+    needs: release
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(needs.release.outputs.paths_released, 'dakit_web')
+    uses: dart-lang/setup-dart/.github/workflows/publish.yml@6afc89df92d6eb3834022f73cd65adc8cdfcb92d # v1.8.1
+    with:
+      working-directory: packages/dakit_web
+    permissions:
+      id-token: write
