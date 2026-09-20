@@ -22,7 +22,7 @@ permissions:
   id-token: write
 
 jobs:
-  # Central workflow emits Release Please component paths for pub.dev OIDC jobs (v1.0.24).
+  # Release Please owns the version bump; pub.dev truth decides whether OIDC publishing is needed.
   release:
     uses: redtidev1918/releasegraph/.github/workflows/reusable-release.yml@d6d0bbec4e37bec025ab13de1783d4af96d6f925 # ReleaseGraph v1.4.8
     with:
@@ -33,9 +33,55 @@ jobs:
       stage: ${{ inputs.stage || 'all' }}
     secrets: inherit
 
-  pub-core:
+  detect-pub:
     needs: release
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(needs.release.outputs.paths_released, 'dakit_core')
+    runs-on: ubuntu-latest
+    outputs:
+      core: ${{ steps.versions.outputs.core }}
+      api: ${{ steps.versions.outputs.api }}
+      flutter: ${{ steps.versions.outputs.flutter }}
+      web: ${{ steps.versions.outputs.web }}
+    steps:
+      - uses: actions/checkout@v7
+      - id: versions
+        run: |
+          python3 - <<'PY'
+          import json
+          import time
+          import urllib.error
+          import urllib.request
+
+          for package in ("dakit_core", "dakit_api", "dakit_flutter", "dakit_web"):
+              local = next(
+                  line.split(":", 1)[1].strip()
+                  for line in open(f"packages/{package}/pubspec.yaml")
+                  if line.startswith("version:")
+              )
+              latest = None
+              for attempt in range(3):
+                  try:
+                      request = urllib.request.Request(
+                          f"https://pub.dev/api/packages/{package}",
+                          headers={"User-Agent": "dakit-release-workflow"},
+                      )
+                      with urllib.request.urlopen(request, timeout=20) as response:
+                          latest = json.load(response).get("latest", {}).get("version")
+                      break
+                  except urllib.error.HTTPError as error:
+                      if error.code != 404:
+                          raise
+                      break
+                  except Exception:
+                      if attempt == 2:
+                          raise
+                      time.sleep(attempt + 1)
+              key = package.removeprefix("dakit_")
+              print(f"{key}={str(latest != local).lower()}")
+          PY
+
+  pub-core:
+    needs: [release, detect-pub]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.detect-pub.outputs.core == 'true'
     uses: dart-lang/setup-dart/.github/workflows/publish.yml@6afc89df92d6eb3834022f73cd65adc8cdfcb92d # v1.8.1
     with:
       working-directory: packages/dakit_core
@@ -43,8 +89,8 @@ jobs:
       id-token: write
 
   pub-api:
-    needs: release
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(needs.release.outputs.paths_released, 'dakit_api')
+    needs: [release, detect-pub]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.detect-pub.outputs.api == 'true'
     uses: dart-lang/setup-dart/.github/workflows/publish.yml@6afc89df92d6eb3834022f73cd65adc8cdfcb92d # v1.8.1
     with:
       working-directory: packages/dakit_api
@@ -52,8 +98,8 @@ jobs:
       id-token: write
 
   pub-flutter:
-    needs: release
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(needs.release.outputs.paths_released, 'dakit_flutter')
+    needs: [release, detect-pub]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.detect-pub.outputs.flutter == 'true'
     uses: dart-lang/setup-dart/.github/workflows/publish.yml@6afc89df92d6eb3834022f73cd65adc8cdfcb92d # v1.8.1
     with:
       working-directory: packages/dakit_flutter
@@ -61,8 +107,8 @@ jobs:
       id-token: write
 
   pub-web:
-    needs: release
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(needs.release.outputs.paths_released, 'dakit_web')
+    needs: [release, detect-pub]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.detect-pub.outputs.web == 'true'
     uses: dart-lang/setup-dart/.github/workflows/publish.yml@6afc89df92d6eb3834022f73cd65adc8cdfcb92d # v1.8.1
     with:
       working-directory: packages/dakit_web
