@@ -12,3 +12,5 @@
   - [发布 DAKit 包](/RELEASING.md)
   - [真实服务验收](/LIVE_TESTING.md)
   - [项目状态与续接说明](/STATUS.md)
+- English
+  - [English index](/en/)

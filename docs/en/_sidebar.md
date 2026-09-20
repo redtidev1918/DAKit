@@ -12,3 +12,5 @@
   - [Releasing DAKit Packages](/en/RELEASING.md)
   - [Live Service Acceptance](/en/LIVE_TESTING.md)
   - [Project Status and Continuation Notes](/en/STATUS.md)
+- 中文
+  - [中文文档](/)

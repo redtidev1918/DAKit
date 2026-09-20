@@ -4,6 +4,10 @@
   <img src="docs/icon.png" alt="DAKit" width="160" />
 </p>
 
+**Language / 语言:** [中文](README.md) · English
+
+📖 Full documentation: <https://redtidev1918.github.io/DAKit/>
+
 [![GitHub stars](https://img.shields.io/github/stars/redtidev1918/DAKit?style=flat&color=yellow)](https://github.com/redtidev1918/DAKit/stargazers)
 [![GitHub license](https://img.shields.io/github/license/redtidev1918/DAKit?style=flat)](LICENSE)
 [![pub.dev](https://img.shields.io/pub/v/dakit_flutter?label=dakit_flutter&style=flat)](https://pub.dev/packages/dakit_flutter)
