@@ -1,11 +1,7 @@
 # Changelog
 
-## [2.0.0](https://github.com/redtidev1918/dakit/compare/dakit_core-v1.0.0...dakit_core-v2.0.0) (2026-09-20)
+## [1.1.0](https://github.com/redtidev1918/dakit/compare/dakit_core-v1.0.0...dakit_core-v1.1.0) (2026-09-20)
 
-
-### ⚠ BREAKING CHANGES
-
-* rename the SDK to DAKit
 
 ### Features
 
@@ -36,10 +32,6 @@
 * **api:** use browse/morelikethis/preview for More Like This ([b535604](https://github.com/redtidev1918/dakit/commit/b535604ea6e87610ea62d66f5b14e833a74461c8))
 * harden related results and destructive transfer removal ([7567ea6](https://github.com/redtidev1918/dakit/commit/7567ea639096543983601afc3fd42adba33eed5b))
 
-
-### Code Refactoring
-
-* rename the SDK to DAKit ([a9f0837](https://github.com/redtidev1918/dakit/commit/a9f0837f22ad1128c4587998ba0c0d11103462f0))
 
 ## [1.0.0](https://github.com/redtidev1918/dakit/compare/dakit_core-vv0.2.0...dakit_core-vv1.0.0) (2026-09-07)
 
