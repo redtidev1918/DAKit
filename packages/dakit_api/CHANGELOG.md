@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.0](https://github.com/redtidev1918/dakit/compare/dakit_api-v1.0.0...dakit_api-v1.1.0) (2026-09-20)
+
+
+### Features
+
+* **media:** standardize media asset ids ([1418f40](https://github.com/redtidev1918/dakit/commit/1418f4081a83e822e0a72ec519f25b9071cf5ef1))
+* **media:** standardize media asset ids ([82cbab6](https://github.com/redtidev1918/dakit/commit/82cbab6b8f81a36a1f5a37716518728cfffc3acc))
+
 ## [1.0.0](https://github.com/redtidev1918/dakit/compare/dakit_api-vv0.2.0...dakit_api-vv1.0.0) (2026-09-07)
 
 
