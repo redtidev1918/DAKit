@@ -135,11 +135,22 @@ final class DeviationInitFetcher {
         // Each additional-media entry nests its Wix descriptor under `media`.
         final media = item is Map ? item['media'] : null;
         if (media is! Map) continue;
-        final asset = _displayAsset(media, '$deviationId:page:${index + 1}');
+        final asset = _displayAsset(
+          media,
+          mediaAssetId(
+            deviationId,
+            MediaRole.preview,
+            variant: 'page:${index + 1}',
+          ),
+        );
         if (asset != null) additional.add(asset);
         final original = _originalAsset(
           media,
-          '$deviationId:page:${index + 1}:original',
+          mediaAssetId(
+            deviationId,
+            MediaRole.original,
+            variant: 'page:${index + 1}',
+          ),
         );
         if (original != null) additionalOriginals.add(original);
       }

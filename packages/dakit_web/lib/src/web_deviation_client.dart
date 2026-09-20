@@ -102,7 +102,7 @@ final class WebDeviationClient {
       final main = _mediaAsset(
         media,
         baseUri: baseUri,
-        id: '$id:original',
+        id: mediaAssetId(id, MediaRole.original),
         role: MediaRole.original,
         index: 0,
       );
@@ -120,7 +120,7 @@ final class WebDeviationClient {
             baseUri: _baseUri(
               itemMedia is Map<String, Object?> ? itemMedia : media,
             ),
-            id: '$id:page$page',
+            id: mediaAssetId(id, MediaRole.attachment, variant: 'page:$page'),
             role: MediaRole.attachment,
             index: page,
           );

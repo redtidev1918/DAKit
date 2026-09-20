@@ -23,7 +23,7 @@ final class DeviationMapper {
       if (uri == null || !seen.add(uri)) return;
       media.add(
         MediaAsset(
-          id: '$id:$field',
+          id: mediaAssetId(id, MediaRole.preview, variant: field),
           kind: MediaKind.image,
           role: MediaRole.preview,
           availability: availability,
@@ -52,7 +52,7 @@ final class DeviationMapper {
       if (uri == null || !seen.add(uri)) continue;
       media.add(
         MediaAsset(
-          id: '$id:thumb:$index',
+          id: mediaAssetId(id, MediaRole.preview, variant: 'thumb:$index'),
           kind: MediaKind.image,
           role: MediaRole.preview,
           availability: MediaAvailability.available,
@@ -72,7 +72,7 @@ final class DeviationMapper {
       final duration = _integer(video['duration']);
       media.add(
         MediaAsset(
-          id: '$id:video:$index',
+          id: mediaAssetId(id, MediaRole.preview, variant: 'video:$index'),
           kind: MediaKind.video,
           role: MediaRole.preview,
           availability: MediaAvailability.available,
@@ -90,7 +90,7 @@ final class DeviationMapper {
       if (uri != null && seen.add(uri)) {
         media.add(
           MediaAsset(
-            id: '$id:animation',
+            id: mediaAssetId(id, MediaRole.preview, variant: 'flash'),
             kind: MediaKind.animation,
             role: MediaRole.preview,
             availability: MediaAvailability.available,
@@ -353,7 +353,7 @@ final class DeviationMapper {
     final uri = _requiredWebUri(json, 'src');
     final filename = _requiredString(json, 'filename');
     return MediaAsset(
-      id: '$artworkId:original',
+      id: mediaAssetId(artworkId, MediaRole.original),
       kind: _kindFromFilename(filename),
       role: MediaRole.original,
       availability: MediaAvailability.available,

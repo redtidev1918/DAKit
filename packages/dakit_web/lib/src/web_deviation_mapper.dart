@@ -81,7 +81,7 @@ final class WebDeviationMapper {
     if (posterUri != null) {
       assets.add(
         MediaAsset(
-          id: '$id:preview',
+          id: mediaAssetId(id, MediaRole.preview, variant: 'poster'),
           kind: MediaKind.image,
           role: MediaRole.preview,
           availability: MediaAvailability.available,
@@ -104,7 +104,7 @@ final class WebDeviationMapper {
         final seconds = (type['d'] as num?)?.toInt();
         videos.add(
           MediaAsset(
-            id: '$id:video:$height',
+            id: mediaAssetId(id, MediaRole.preview, variant: 'video:$height'),
             kind: MediaKind.video,
             role: MediaRole.preview,
             availability: MediaAvailability.available,
@@ -121,7 +121,7 @@ final class WebDeviationMapper {
       if (largest != null) {
         assets.add(
           MediaAsset(
-            id: '$id:original',
+            id: mediaAssetId(id, MediaRole.original),
             kind: MediaKind.video,
             role: MediaRole.original,
             availability: isDownloadable
@@ -150,7 +150,7 @@ final class WebDeviationMapper {
             wixTypeNamed(types, 'fullview') ?? wixLargestImageType(types);
         assets.add(
           MediaAsset(
-            id: '$id:display',
+            id: mediaAssetId(id, MediaRole.preview, variant: 'display'),
             kind: MediaKind.image,
             role: MediaRole.preview,
             availability: MediaAvailability.available,
@@ -169,7 +169,7 @@ final class WebDeviationMapper {
         if (displayUri != null) {
           assets.add(
             MediaAsset(
-              id: '$id:display',
+              id: mediaAssetId(id, MediaRole.preview, variant: 'display'),
               kind: MediaKind.image,
               role: MediaRole.preview,
               availability: MediaAvailability.available,
@@ -183,7 +183,7 @@ final class WebDeviationMapper {
 
       assets.add(
         MediaAsset(
-          id: '$id:original',
+          id: mediaAssetId(id, MediaRole.original),
           kind: MediaKind.image,
           role: MediaRole.original,
           availability: isDownloadable

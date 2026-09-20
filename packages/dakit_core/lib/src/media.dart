@@ -60,3 +60,28 @@ final class MediaAsset {
   bool get canTransfer =>
       availability == MediaAvailability.available && uri != null;
 }
+
+/// Builds the shared [MediaAsset.id] scheme used by official and web adapters.
+///
+/// IDs are scoped by the owning artwork and role. [variant] distinguishes
+/// multiple assets with the same role (for example thumbnails or video
+/// qualities). Keeping this in `dakit_core` prevents adapters from inventing
+/// provider-specific one-off formats.
+String mediaAssetId(String artworkId, MediaRole role, {String? variant}) {
+  final normalizedArtworkId = artworkId.trim();
+  final normalizedVariant = variant?.trim();
+  if (normalizedArtworkId.isEmpty) {
+    throw ArgumentError.value(artworkId, 'artworkId', 'must not be empty');
+  }
+  if (normalizedVariant != null && normalizedVariant.isEmpty) {
+    throw ArgumentError.value(variant, 'variant', 'must not be empty');
+  }
+  final roleSegment = switch (role) {
+    MediaRole.preview => 'preview',
+    MediaRole.original => 'original',
+    MediaRole.attachment => 'attachment',
+  };
+  return normalizedVariant == null
+      ? '$normalizedArtworkId:$roleSegment'
+      : '$normalizedArtworkId:$roleSegment:$normalizedVariant';
+}
