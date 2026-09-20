@@ -18,10 +18,12 @@ Host app / example_client
           ▼
      dakit_core ───────── Models, errors, repositories, diagnostics, transfer contracts
 
-    dakit_cli ─────────── Pure-Dart CLI kit (depends on api/core, not Flutter)
+    dakit_cli ─────────── Pure-Dart CLI kit (depends on api/web/core, not Flutter)
+
+    dakit_web ─────────── Optional private web-protocol adapters (depend on core, not Flutter/WebView)
 ```
 
-`dakit_core` does not depend on Flutter or networking libraries; `dakit_api` uses only Dart capabilities; `dakit_flutter` is the layer that depends on platform plugins; `dakit_cli` is a pure-Dart debugging and batch-download tool. Dependencies point only downward; the domain layer never references implementation layers.
+`dakit_core` does not depend on Flutter or networking libraries; `dakit_api` uses only Dart capabilities; `dakit_flutter` is the layer that depends on platform plugins; `dakit_cli` is a pure-Dart debugging and batch-download tool; `dakit_web` is an optional adapter with no Flutter or WebView dependency. Dependencies point only downward; the domain layer never references implementation layers.
 
 ## Responsibilities of Each Layer
 
@@ -46,6 +48,14 @@ This layer is suited to domain tests, offline cache wrappers, and non-Flutter Da
 DTOs are not exported from the top-level library. Unknown fields newly added by official responses must not break parsing; missing required fields must throw a clear parsing failure.
 
 `OfficialApiTransport` provides the read extension point, and `OfficialApiMutationTransport` additionally provides unified URL-encoded POST. GETs retry 429/500/503 with configured backoff; non-idempotent POSTs only refresh the token once after a 401 and never auto-retry a write that may already have taken effect.
+
+### `dakit_web`
+
+- Optional private web-protocol adapters for search/RFY, collections/galleries,
+  profiles, and More Like This;
+- Performs only “session + request → DeviantArt DTO → `dakit_core` model”;
+- Does not depend on Flutter or WebView and does not own sign-in, Cookie/CSRF
+  refresh, or session persistence.
 
 ### `dakit_flutter`
 
@@ -116,4 +126,4 @@ remain explicit in asset names and release notes.
 
 ## Versioning and New Features
 
-The three packages are released independently under semantic versioning. When adding capabilities such as notifications, messages, or submitting deviations, first add the minimal domain contract in core, then implement the official adapter in api, and finally verify platform interaction in Flutter/example. Never call an unwrapped endpoint directly from page components.
+Public packages are released independently under semantic versioning. When adding capabilities such as notifications, messages, or submitting deviations, first add the minimal domain contract in core, then implement the official adapter in api, and finally verify platform interaction in Flutter/example. Never call an unwrapped endpoint directly from page components.

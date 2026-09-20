@@ -113,8 +113,15 @@ If you only need pure-Dart capabilities, declare them individually:
 
 ```yaml
 dependencies:
-  dakit_core: ^1.0.0
-  dakit_api: ^1.0.0
+  dakit_core: ^1.1.0
+  dakit_api: ^1.1.0
+```
+
+For optional private-website adapters, add:
+
+```yaml
+dependencies:
+  dakit_web: ^0.2.1
 ```
 
 Then read [Getting started](docs/en/GETTING_STARTED.md). To run the built-in
