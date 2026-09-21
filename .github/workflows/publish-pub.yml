@@ -1,0 +1,47 @@
+name: Publish Dart Packages
+# pub.dev only allows automated publishing from GitHub Actions when the
+# workflow is triggered by a git tag matching the package tag pattern.
+# release.yml pushes these component tags after a version change.
+on:
+  push:
+    tags:
+      - "dakit_core-v*"
+      - "dakit_api-v*"
+      - "dakit_flutter-v*"
+      - "dakit_web-v*"
+
+permissions:
+  contents: read
+
+jobs:
+  pub-core:
+    if: startsWith(github.ref_name, 'dakit_core-v')
+    uses: dart-lang/setup-dart/.github/workflows/publish.yml@6afc89df92d6eb3834022f73cd65adc8cdfcb92d # v1.8.1
+    with:
+      working-directory: packages/dakit_core
+    permissions:
+      id-token: write
+
+  pub-api:
+    if: startsWith(github.ref_name, 'dakit_api-v')
+    uses: dart-lang/setup-dart/.github/workflows/publish.yml@6afc89df92d6eb3834022f73cd65adc8cdfcb92d # v1.8.1
+    with:
+      working-directory: packages/dakit_api
+    permissions:
+      id-token: write
+
+  pub-flutter:
+    if: startsWith(github.ref_name, 'dakit_flutter-v')
+    uses: dart-lang/setup-dart/.github/workflows/publish.yml@6afc89df92d6eb3834022f73cd65adc8cdfcb92d # v1.8.1
+    with:
+      working-directory: packages/dakit_flutter
+    permissions:
+      id-token: write
+
+  pub-web:
+    if: startsWith(github.ref_name, 'dakit_web-v')
+    uses: dart-lang/setup-dart/.github/workflows/publish.yml@6afc89df92d6eb3834022f73cd65adc8cdfcb92d # v1.8.1
+    with:
+      working-directory: packages/dakit_web
+    permissions:
+      id-token: write

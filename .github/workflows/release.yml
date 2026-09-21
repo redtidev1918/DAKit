@@ -82,38 +82,51 @@ jobs:
           out.close()
           PY
 
-  pub-core:
+  # pub.dev only accepts GitHub Actions publishing when the workflow is
+  # triggered by a git tag matching the configured tag pattern. Push the
+  # per-component tag here; publish-pub.yml runs the actual OIDC publish.
+  tag-pub-components:
     needs: [release, detect-pub]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.detect-pub.outputs.core == 'true'
-    uses: dart-lang/setup-dart/.github/workflows/publish.yml@6afc89df92d6eb3834022f73cd65adc8cdfcb92d # v1.8.1
-    with:
-      working-directory: packages/dakit_core
+    if: >-
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main' &&
+      (needs.detect-pub.outputs.core == 'true' ||
+       needs.detect-pub.outputs.api == 'true' ||
+       needs.detect-pub.outputs.flutter == 'true' ||
+       needs.detect-pub.outputs.web == 'true')
+    runs-on: ubuntu-latest
     permissions:
-      id-token: write
-
-  pub-api:
-    needs: [release, detect-pub]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.detect-pub.outputs.api == 'true'
-    uses: dart-lang/setup-dart/.github/workflows/publish.yml@6afc89df92d6eb3834022f73cd65adc8cdfcb92d # v1.8.1
-    with:
-      working-directory: packages/dakit_api
-    permissions:
-      id-token: write
-
-  pub-flutter:
-    needs: [release, detect-pub]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.detect-pub.outputs.flutter == 'true'
-    uses: dart-lang/setup-dart/.github/workflows/publish.yml@6afc89df92d6eb3834022f73cd65adc8cdfcb92d # v1.8.1
-    with:
-      working-directory: packages/dakit_flutter
-    permissions:
-      id-token: write
-
-  pub-web:
-    needs: [release, detect-pub]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.detect-pub.outputs.web == 'true'
-    uses: dart-lang/setup-dart/.github/workflows/publish.yml@6afc89df92d6eb3834022f73cd65adc8cdfcb92d # v1.8.1
-    with:
-      working-directory: packages/dakit_web
-    permissions:
-      id-token: write
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+      - name: Tag changed pub components
+        env:
+          CORE: ${{ needs.detect-pub.outputs.core }}
+          API: ${{ needs.detect-pub.outputs.api }}
+          FLUTTER: ${{ needs.detect-pub.outputs.flutter }}
+          WEB: ${{ needs.detect-pub.outputs.web }}
+        run: |
+          set -euo pipefail
+          publish_tag() {
+            local pkg="$1" flag="$2" version tag
+            if [ "$flag" != true ]; then
+              return 0
+            fi
+            version="$(awk -F': ' '/^version:/{print $2; exit}' "packages/$pkg/pubspec.yaml")"
+            if [ -z "$version" ]; then
+              echo "missing version for $pkg" >&2
+              exit 1
+            fi
+            tag="$pkg-v$version"
+            if git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
+              echo "tag $tag already exists"
+              return 0
+            fi
+            git tag "$tag"
+            git push origin "$tag"
+            echo "pushed tag $tag"
+          }
+          publish_tag dakit_core "$CORE"
+          publish_tag dakit_api "$API"
+          publish_tag dakit_flutter "$FLUTTER"
+          publish_tag dakit_web "$WEB"
