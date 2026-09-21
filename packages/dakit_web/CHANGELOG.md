@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.2 (2026-09-21)
+
+- Publish from the canonical `DAKit` repository after the GitHub rename.
+
 ## 0.2.1 (2026-09-20)
 
 - Require `dakit_core` 1.1.0 for the shared stable media asset IDs.
