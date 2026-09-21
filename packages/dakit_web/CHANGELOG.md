@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.4 (2026-09-22)
+
+- Refresh the DeviantArt CSRF from the matching cookie session when `rfy`
+  returns HTTP 400, fixing the personalized recommendation feed after an app
+  update invalidates the persisted token context.
+
 ## 0.2.3 (2026-09-21)
 
 - Verify tag-ref OIDC publishing from the canonical `DAKit` repository.
