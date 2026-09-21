@@ -45,12 +45,14 @@ jobs:
       - uses: actions/checkout@v7
       - id: versions
         run: |
-          python3 - <<'PY'
+          python3 - "$GITHUB_OUTPUT" <<'PY'
+          import sys
           import json
           import time
           import urllib.error
           import urllib.request
 
+          out = open(sys.argv[1], "a", encoding="utf-8")
           for package in ("dakit_core", "dakit_api", "dakit_flutter", "dakit_web"):
               local = next(
                   line.split(":", 1)[1].strip()
@@ -76,7 +78,8 @@ jobs:
                           raise
                       time.sleep(attempt + 1)
               key = package.removeprefix("dakit_")
-              print(f"{key}={str(latest != local).lower()}")
+              out.write(f"{key}={str(latest != local).lower()}\n")
+          out.close()
           PY
 
   pub-core:
