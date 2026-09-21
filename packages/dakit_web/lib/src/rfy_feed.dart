@@ -1,8 +1,8 @@
 import 'package:dakit_core/dakit_core.dart';
 import 'package:dio/dio.dart';
 
-import 'web_deviation_mapper.dart';
 import 'web_csrf.dart';
+import 'web_deviation_mapper.dart';
 import 'web_session_options.dart';
 
 /// Fetches the web `rfy/deviations` personalized recommendation feed.
