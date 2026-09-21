@@ -97,10 +97,12 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      actions: write
     steps:
       - uses: actions/checkout@v7
       - name: Tag changed pub components
         env:
+          GH_TOKEN: ${{ github.token }}
           CORE: ${{ needs.detect-pub.outputs.core }}
           API: ${{ needs.detect-pub.outputs.api }}
           FLUTTER: ${{ needs.detect-pub.outputs.flutter }}
@@ -124,6 +126,9 @@ jobs:
             fi
             git tag "$tag"
             git push origin "$tag"
+            # GITHUB_TOKEN-created tag pushes never trigger workflows, so the
+            # tag ref is dispatched explicitly; pub.dev sees refType=tag.
+            gh workflow run publish-pub.yml --ref "$tag"
             echo "pushed tag $tag"
           }
           publish_tag dakit_core "$CORE"

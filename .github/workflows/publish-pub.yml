@@ -9,6 +9,7 @@ on:
       - "dakit_api-v*"
       - "dakit_flutter-v*"
       - "dakit_web-v*"
+  workflow_dispatch:
 
 permissions:
   contents: read
