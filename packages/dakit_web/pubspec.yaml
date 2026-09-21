@@ -1,6 +1,6 @@
 name: dakit_web
 description: Optional private web compatibility adapters for the DAKit client SDK.
-version: 0.2.2
+version: 0.2.3
 topics:
   - deviantart
   - deviantart-api

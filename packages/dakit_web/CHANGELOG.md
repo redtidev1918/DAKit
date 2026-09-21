@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.3 (2026-09-21)
+
+- Verify tag-ref OIDC publishing from the canonical `DAKit` repository.
+
 ## 0.2.2 (2026-09-21)
 
 - Publish from the canonical `DAKit` repository after the GitHub rename.
