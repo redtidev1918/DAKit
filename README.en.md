@@ -8,7 +8,7 @@
 
 **A modular DeviantArt client SDK for Dart / Flutter.**
 
-📖 Full documentation: <https://redtidev1918.github.io/DAKit/>
+📖 [Full documentation](https://redtidev1918.github.io/DAKit/)
 
 [![GitHub stars](https://img.shields.io/github/stars/redtidev1918/DAKit?style=flat&color=yellow)](https://github.com/redtidev1918/DAKit/stargazers)
 [![GitHub license](https://img.shields.io/github/license/redtidev1918/DAKit?style=flat)](LICENSE)

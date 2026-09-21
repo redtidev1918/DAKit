@@ -8,7 +8,7 @@
 
 **面向 Dart / Flutter 的模块化 DeviantArt 客户端 SDK。**
 
-📖 完整文档：<https://redtidev1918.github.io/DAKit/>
+📖 [完整文档](https://redtidev1918.github.io/DAKit/)
 
 [![GitHub stars](https://img.shields.io/github/stars/redtidev1918/DAKit?style=flat&color=yellow)](https://github.com/redtidev1918/DAKit/stargazers)
 [![GitHub license](https://img.shields.io/github/license/redtidev1918/DAKit?style=flat)](LICENSE)
