@@ -32,6 +32,8 @@ pub.dev 包的 OIDC 发布触发。不要手动打发布 tag。
   `dakit_web-vX.Y.Z`。
 - 每个 pub.dev 包的 GitHub Actions 配置必须指向规范仓库
   `redtidev1918/DAKit`；仓库改名后旧小写名不会通过 OIDC 校验。
+- `GITHUB_TOKEN` 推 tag 不会触发 workflow；Release workflow 会显式
+  dispatch `publish-pub.yml` 到组件 tag ref，使 OIDC token 保持 `tag` refType。
 - 发布顺序固定为 `core → api → web → flutter`；不要重发 pub.dev 上已存在的版本。
 
 ## 发布前检查
