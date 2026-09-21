@@ -6,7 +6,7 @@
 
 **语言 / Language:** 中文 · [English](README.en.md)
 
-**面向 Dart / Flutter 的模块化 DeviantArt 客户端 SDK。**
+> **面向 Dart / Flutter 的模块化 DeviantArt 客户端 SDK。**
 
 📖 [完整文档](https://redtidev1918.github.io/DAKit/)
 

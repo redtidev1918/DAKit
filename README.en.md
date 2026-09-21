@@ -6,7 +6,7 @@
 
 **Language / 语言:** [中文](README.md) · English
 
-**A modular DeviantArt client SDK for Dart / Flutter.**
+> **A modular DeviantArt client SDK for Dart / Flutter.**
 
 📖 [Full documentation](https://redtidev1918.github.io/DAKit/)
 
