@@ -18,9 +18,24 @@ by hand.
    `release-please-config.json` and `.release-please-manifest.json`;
 3. Review and merge the version change after CI passes;
 4. On `main`, the Release workflow compares local `pubspec.yaml` versions with
-   pub.dev latest and publishes only locally newer packages;
-5. Confirm the result in Actions and on pub.dev; validate CLI Release assets and
+   pub.dev latest and pushes component tags for locally newer packages;
+5. `publish-pub.yml` publishes each package from its component tag;
+6. Confirm the result in Actions and on pub.dev; validate CLI Release assets and
    `SHA256SUMS` against the required list in `.release-policy.yml`.
+
+## pub.dev publishing rules
+
+- pub.dev only accepts OIDC publishing triggered by a **git tag**. Publishing
+  from a main-branch push is always rejected with
+  `publishing is only allowed from 'tag' refType`.
+- Component tags must exactly match the tag pattern configured on pub.dev:
+  `dakit_core-vX.Y.Z`, `dakit_api-vX.Y.Z`, `dakit_flutter-vX.Y.Z`, and
+  `dakit_web-vX.Y.Z`.
+- Each pub.dev package's GitHub Actions configuration must point to the canonical
+  repository `redtidev1918/DAKit`; stale lowercase names fail OIDC after a
+  repository rename.
+- The publish order is fixed as `core -> api -> web -> flutter`; never republish
+  a version that already exists on pub.dev.
 
 ## Pre-release checks
 
