@@ -1,5 +1,42 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:dakit_web/dakit_web.dart';
+import 'package:dio/dio.dart';
 import 'package:test/test.dart';
+
+class _StubAdapter implements HttpClientAdapter {
+  _StubAdapter(this._handler);
+
+  final ResponseBody Function(RequestOptions options) _handler;
+
+  @override
+  void close({bool force = false}) {}
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async => _handler(options);
+}
+
+ResponseBody _html(String body) => ResponseBody.fromString(
+  body,
+  200,
+  headers: <String, List<String>>{
+    Headers.contentTypeHeader: <String>['text/html'],
+  },
+);
+
+ResponseBody _json(Object body, {int status = 200}) =>
+    ResponseBody.fromBytes(
+      utf8.encode(jsonEncode(body)),
+      status,
+      headers: <String, List<String>>{
+        Headers.contentTypeHeader: <String>['application/json'],
+      },
+    );
 
 void main() {
   test('parses a personalized rfy/deviations payload', () {
@@ -61,6 +98,37 @@ void main() {
       page.items.single.publishedAt?.toUtc(),
       DateTime.parse('2026-08-20T19:00:00Z'),
     );
+  });
+
+  test('refreshes a stale CSRF with the matching cookie session on 400', () async {
+    var endpointCalls = 0;
+    final dio = Dio()..httpClientAdapter = _StubAdapter((options) {
+      if (options.uri.host == 'www.deviantart.com' &&
+          options.uri.path == '/') {
+        return _html("<script>window.__CSRF_TOKEN__ = 'fresh-token'</script>");
+      }
+      endpointCalls += 1;
+      if (endpointCalls == 1) {
+        return _json(<String, Object?>{
+          'error': 'invalid_request',
+          'errorDetails': <String, Object?>{'csrf': 'invalid'},
+          'status': 'error',
+        }, status: 400);
+      }
+      return _json(<String, Object?>{
+        'hasMore': true,
+        'nextCursor': 'abc123',
+        'deviations': <Object?>[_deviation(9, 'Fresh work')],
+      });
+    });
+
+    final page = await RfyFeedFetcher(dio).fetch(
+      cookieHeader: 'userinfo=abc; csrf=old',
+      csrfToken: 'stale-token',
+    );
+
+    expect(page.items.single.title, 'Fresh work');
+    expect(endpointCalls, 2);
   });
 }
 
