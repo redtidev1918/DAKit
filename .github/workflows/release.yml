@@ -24,7 +24,7 @@ permissions:
 jobs:
   # Release Please owns the version bump; pub.dev truth decides whether OIDC publishing is needed.
   release:
-    uses: redtidev1918/releasegraph/.github/workflows/reusable-release.yml@d6d0bbec4e37bec025ab13de1783d4af96d6f925 # ReleaseGraph v1.4.8
+    uses: redtidev1918/releasegraph/.github/workflows/reusable-release.yml@c035ba8a92fd3a268143608d0043a680576ae812 # ReleaseGraph c035ba8 (Chinese release-body constraint)
     with:
       version: ${{ inputs.version || '' }}
       dry_run: ${{ github.event_name == 'pull_request' || inputs.dry_run || false }}
