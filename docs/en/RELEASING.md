@@ -34,6 +34,9 @@ by hand.
 - Each pub.dev package's GitHub Actions configuration must point to the canonical
   repository `redtidev1918/DAKit`; stale lowercase names fail OIDC after a
   repository rename.
+- Tag pushes made with `GITHUB_TOKEN` do not trigger workflows, so the Release
+  workflow explicitly dispatches `publish-pub.yml` at the component tag ref,
+  keeping the OIDC token at `tag` refType.
 - The publish order is fixed as `core -> api -> web -> flutter`; never republish
   a version that already exists on pub.dev.
 
