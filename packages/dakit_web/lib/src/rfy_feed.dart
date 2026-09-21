@@ -31,9 +31,8 @@ final class RfyFeedFetcher {
       // app update; DeviantArt then answers 400 with `csrf: invalid`. Scrape a
       // fresh token from the home page with the exact Cookie header we send.
       if (error.response?.statusCode != 400) rethrow;
-      final matchingCsrf = await WebCsrfFetcher(_dio).fetch(
-        cookieHeader: cookieHeader,
-      );
+      final matchingCsrf = await WebCsrfFetcher(_dio)
+          .fetch(cookieHeader: cookieHeader);
       if (matchingCsrf.isEmpty || matchingCsrf == csrfToken) rethrow;
       return await _fetchOnce(matchingCsrf, cookieHeader, cursor);
     }

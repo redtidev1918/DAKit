@@ -16,8 +16,9 @@ final class WebCsrfFetcher {
   final Dio _dio;
 
   static final Uri _home = Uri.parse('https://www.deviantart.com/');
-  static final RegExp _csrfPattern =
-      RegExp(r"window\.__CSRF_TOKEN__ = '([^']*)'");
+  static final RegExp _csrfPattern = RegExp(
+    r"window\.__CSRF_TOKEN__ = '([^']*)'",
+  );
 
   Future<String> fetch({required String cookieHeader}) async {
     final response = await _dio.get<String>(
