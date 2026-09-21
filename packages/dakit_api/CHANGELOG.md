@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/redtidev1918/dakit/compare/dakit_api-v1.1.0...dakit_api-v1.1.1) (2026-09-22)
+
+### Bug Fixes
+
+- request `mature_content` in `browse/morelikethis/preview` so NSFW related
+  artwork is returned unblurred.
+
 ## [1.1.0](https://github.com/redtidev1918/dakit/compare/dakit_api-v1.0.0...dakit_api-v1.1.0) (2026-09-20)
 
 
