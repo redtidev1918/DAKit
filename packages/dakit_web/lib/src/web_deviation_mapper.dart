@@ -23,6 +23,7 @@ final class WebDeviationMapper {
     final username = author['username'] as String? ?? '';
     final media = json['media'] as Map? ?? const <Object?, Object?>{};
     final isDownloadable = json['isDownloadable'] == true;
+    final viewGate = _viewGateAvailability(json);
 
     return Artwork(
       id: id,
@@ -35,7 +36,7 @@ final class WebDeviationMapper {
         profileUri: Uri.https('www.deviantart.com', '/$username'),
       ),
       pageUri: _uri(json['url']) ?? Uri.https('www.deviantart.com'),
-      media: _mediaAssets(media, id, json),
+      media: _mediaAssets(media, id, json, viewGate),
       // Feeds sort by the artwork's latest activity time. The DAKit model only
       // carries one timestamp, so prefer the website's update time (present for
       // edited deviations) and fall back to the publish time; the detail screen
@@ -45,7 +46,9 @@ final class WebDeviationMapper {
       isDownloadable: isDownloadable,
       isFavourited: json['isFavourited'] == true,
       isMultiMedia: json['isMultiMedia'] == true,
-      downloadAvailability: isDownloadable
+      downloadAvailability: viewGate != MediaAvailability.available
+          ? viewGate
+          : isDownloadable
           ? MediaAvailability.available
           : MediaAvailability.unavailable,
     );
@@ -57,6 +60,7 @@ final class WebDeviationMapper {
     Map<Object?, Object?> media,
     String id,
     Map<Object?, Object?> json,
+    MediaAvailability viewGate,
   ) {
     final base = media['baseUri'] as String?;
     final pretty = media['prettyName'] as String? ?? '';
@@ -107,7 +111,7 @@ final class WebDeviationMapper {
             id: mediaAssetId(id, MediaRole.preview, variant: 'video:$height'),
             kind: MediaKind.video,
             role: MediaRole.preview,
-            availability: MediaAvailability.available,
+            availability: viewGate,
             uri: Uri.tryParse(withWixToken(url, type, tokens)),
             width: (type['w'] as num?)?.toInt(),
             height: height,
@@ -124,7 +128,9 @@ final class WebDeviationMapper {
             id: mediaAssetId(id, MediaRole.original),
             kind: MediaKind.video,
             role: MediaRole.original,
-            availability: isDownloadable
+            availability: viewGate != MediaAvailability.available
+                ? viewGate
+                : isDownloadable
                 ? MediaAvailability.available
                 : MediaAvailability.unavailable,
             uri: largest.uri,
@@ -153,7 +159,7 @@ final class WebDeviationMapper {
             id: mediaAssetId(id, MediaRole.preview, variant: 'display'),
             kind: MediaKind.image,
             role: MediaRole.preview,
-            availability: MediaAvailability.available,
+            availability: viewGate,
             uri: fullUri,
             mimeType: 'image/gif',
             width: (gifType?['w'] as num?)?.toInt(),
@@ -172,7 +178,7 @@ final class WebDeviationMapper {
               id: mediaAssetId(id, MediaRole.preview, variant: 'display'),
               kind: MediaKind.image,
               role: MediaRole.preview,
-              availability: MediaAvailability.available,
+              availability: viewGate,
               uri: displayUri,
               width: (display?['w'] as num?)?.toInt(),
               height: (display?['h'] as num?)?.toInt(),
@@ -186,7 +192,9 @@ final class WebDeviationMapper {
           id: mediaAssetId(id, MediaRole.original),
           kind: MediaKind.image,
           role: MediaRole.original,
-          availability: isDownloadable
+          availability: viewGate != MediaAvailability.available
+              ? viewGate
+              : isDownloadable
               ? MediaAvailability.available
               : MediaAvailability.unavailable,
           uri: fullUri,
@@ -199,6 +207,24 @@ final class WebDeviationMapper {
     }
 
     return List<MediaAsset>.unmodifiable(assets);
+  }
+
+  /// Website payloads may gate paid/restricted content even when a thumbnail
+  /// URL exists. Read the premium/tier/lock fields the same way the official
+  /// mapper does so feed cards do not look freely viewable.
+  static MediaAvailability _viewGateAvailability(Map<Object?, Object?> json) {
+    if (json['isBlocked'] == true || json['isDeleted'] == true) {
+      return MediaAvailability.restricted;
+    }
+    final premium = json['premiumFolderData'] ?? json['premium_folder_data'];
+    if (premium is Map && premium['hasAccess'] == false) {
+      return MediaAvailability.purchaseRequired;
+    }
+    final tier = json['tierAccess'] ?? json['tier_access'];
+    if (tier == 'locked' || tier == 'locked-subscribed') {
+      return MediaAvailability.purchaseRequired;
+    }
+    return MediaAvailability.available;
   }
 
   static String _filenameFromUri(Uri uri, String pretty, String filetype) {
