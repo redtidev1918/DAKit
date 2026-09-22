@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.5 (2026-09-22)
+
+- Map premium folder, `tierAccess`, and blocked flags from website payloads
+  into `MediaAvailability`, so feed cards and detail pages show a lock/gate
+  instead of looking freely viewable.
+
 ## 0.2.4 (2026-09-22)
 
 - Refresh the DeviantArt CSRF from the matching cookie session when `rfy`

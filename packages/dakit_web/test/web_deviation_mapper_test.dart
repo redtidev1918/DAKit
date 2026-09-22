@@ -63,4 +63,57 @@ void main() {
     });
     expect(artwork.id, '12345');
   });
+
+  test('premium folder without access maps to a purchase-required gate', () {
+    final artwork = WebDeviationMapper.mapDeviation(<String, Object?>{
+      'deviationId': 11,
+      'title': 'Paid',
+      'url': 'https://www.deviantart.com/artist/art/Paid-11',
+      'media': <String, Object?>{
+        'baseUri': 'https://img.example.test/paid.jpg',
+        'prettyName': 'paid',
+        'token': <String>['tok'],
+        'types': <Object?>[
+          <String, Object?>{
+            't': 'fullview',
+            'c': 'v1/fill/w_1280/<prettyName>',
+            'w': 1280,
+            'r': 0,
+          },
+        ],
+      },
+      'isDownloadable': true,
+      'isMature': false,
+      'premiumFolderData': <String, Object?>{
+        'type': 'premium',
+        'hasAccess': false,
+      },
+    });
+
+    expect(artwork.downloadAvailability, MediaAvailability.purchaseRequired);
+    expect(
+      artwork.media
+          .firstWhere((m) => m.id.endsWith(':preview:display'))
+          .availability,
+      MediaAvailability.purchaseRequired,
+    );
+    expect(
+      artwork.media
+          .firstWhere((m) => m.id.endsWith(':preview:poster'))
+          .availability,
+      MediaAvailability.available,
+    );
+  });
+
+  test('tier locked maps to a purchase-required gate', () {
+    final artwork = WebDeviationMapper.mapDeviation(<String, Object?>{
+      'deviationId': 12,
+      'title': 'Tier',
+      'url': 'https://www.deviantart.com/artist/art/Tier-12',
+      'media': <String, Object?>{},
+      'tierAccess': 'locked',
+    });
+
+    expect(artwork.downloadAvailability, MediaAvailability.purchaseRequired);
+  });
 }
