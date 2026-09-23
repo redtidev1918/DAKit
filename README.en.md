@@ -28,9 +28,8 @@ with or endorsed by DeviantArt. "DeviantArt" is used only to name the service
 the SDK connects to.
 
 > **Reference app**: [DAViewer](https://github.com/redtidev1918/DAViewer) is a
-> complete third-party DeviantArt client built on DAKit — born because
-> DeviantArt abandoned its official app — and is the best example of DAKit in
-> real use.
+> complete third-party DeviantArt client built on DAKit, created after
+> DeviantArt stopped maintaining its official app. It shows DAKit in real use.
 
 ## Contents
 

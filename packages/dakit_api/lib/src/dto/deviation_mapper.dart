@@ -10,6 +10,7 @@ final class DeviationMapper {
     final authorJson = _requiredMap(json, 'author');
     final author = user(authorJson);
     final downloadAvailability = _downloadAvailability(json);
+    final viewAvailability = _viewAvailability(json);
     final media = <MediaAsset>[];
     final seen = <Uri>{};
 
@@ -35,10 +36,11 @@ final class DeviationMapper {
       );
     }
 
-    // The full-size `content` image follows the download availability (premium/
-    // paid content is gated); `preview`/`social_preview` thumbnails stay
-    // available so hosts can still render a low-res preview.
-    addImage('content', availability: downloadAvailability);
+    // `content` is the inline full-size view used by feeds and media viewers.
+    // Not being downloadable does not make it unviewable (mature content is
+    // the common case), so viewability and downloadability stay separate
+    // states; premium/blocked content is still gated.
+    addImage('content', availability: viewAvailability);
     addImage('preview');
     addImage('social_preview');
 
@@ -429,6 +431,19 @@ final class DeviationMapper {
   }
 
   static MediaAvailability _downloadAvailability(Map<String, Object?> json) {
+    final gate = _contentGateAvailability(json);
+    if (gate != MediaAvailability.available) return gate;
+    if (json['is_downloadable'] == true) return MediaAvailability.available;
+    return MediaAvailability.unavailable;
+  }
+
+  static MediaAvailability _viewAvailability(Map<String, Object?> json) {
+    final gate = _contentGateAvailability(json);
+    if (gate != MediaAvailability.available) return gate;
+    return MediaAvailability.available;
+  }
+
+  static MediaAvailability _contentGateAvailability(Map<String, Object?> json) {
     if (json['is_deleted'] == true) return MediaAvailability.missing;
     if (json['is_blocked'] == true) return MediaAvailability.restricted;
     final premium = _map(json['premium_folder_data']);
@@ -439,8 +454,7 @@ final class DeviationMapper {
     if (tierAccess == 'locked' || tierAccess == 'locked-subscribed') {
       return MediaAvailability.purchaseRequired;
     }
-    if (json['is_downloadable'] == true) return MediaAvailability.available;
-    return MediaAvailability.unavailable;
+    return MediaAvailability.available;
   }
 
   static MediaKind _kindFromFilename(String filename) {

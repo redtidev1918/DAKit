@@ -46,6 +46,24 @@ void main() {
     expect(transport.requests.single.query['expand'], 'deviation.fulltext');
   });
 
+  test('mature content stays viewable when downloads are disabled', () async {
+    final raw = await fixture('deviation.json')
+      ..['is_mature'] = true
+      ..['is_downloadable'] = false;
+    final contentSrc =
+        ((raw['content'] as Map<String, Object?>)['src'] as String);
+    final transport = FixtureTransport(<Map<String, Object?>>[raw]);
+
+    final artwork = await OfficialArtworkRepository(transport).getById('art-1');
+
+    expect(artwork.isMature, isTrue);
+    expect(artwork.downloadAvailability, MediaAvailability.unavailable);
+    final content = artwork.media.singleWhere(
+      (asset) => asset.uri?.toString() == contentSrc,
+    );
+    expect(content.availability, MediaAvailability.available);
+  });
+
   test('maps formatted_excerpt when excerpt is absent', () async {
     final transport = FixtureTransport(<Map<String, Object?>>[
       <String, Object?>{
@@ -199,7 +217,10 @@ void main() {
     final result = await repository.moreLikeThis('art-1');
 
     expect(transport.requests.single.path, 'browse/morelikethis/preview');
-    expect(transport.requests.single.query, <String, Object?>{'seed': 'art-1'});
+    expect(transport.requests.single.query, <String, Object?>{
+      'seed': 'art-1',
+      'mature_content': true,
+    });
     // "More from DA" first, then "More from artist", de-duplicated and without
     // the seed itself.
     expect(result.artworks.map((artwork) => artwork.id), <String>[

@@ -1,8 +1,8 @@
 import 'package:dakit_core/dakit_core.dart';
 import 'package:dio/dio.dart';
 
-import 'web_deviation_mapper.dart';
 import 'web_csrf.dart';
+import 'web_deviation_mapper.dart';
 import 'web_session_options.dart';
 
 /// Fetches the web `rfy/deviations` personalized recommendation feed.
@@ -31,9 +31,8 @@ final class RfyFeedFetcher {
       // app update; DeviantArt then answers 400 with `csrf: invalid`. Scrape a
       // fresh token from the home page with the exact Cookie header we send.
       if (error.response?.statusCode != 400) rethrow;
-      final matchingCsrf = await WebCsrfFetcher(_dio).fetch(
-        cookieHeader: cookieHeader,
-      );
+      final matchingCsrf = await WebCsrfFetcher(_dio)
+          .fetch(cookieHeader: cookieHeader);
       if (matchingCsrf.isEmpty || matchingCsrf == csrfToken) rethrow;
       return await _fetchOnce(matchingCsrf, cookieHeader, cursor);
     }
