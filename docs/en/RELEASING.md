@@ -23,6 +23,17 @@ by hand.
 6. Confirm the result in Actions and on pub.dev; validate CLI Release assets and
    `SHA256SUMS` against the required list in `.release-policy.yml`.
 
+## Version PR authorship and CI
+
+The version PR is created by release-please with `RELEASE_PLEASE_TOKEN`, which
+this repository has configured. Without that secret the author falls back to
+`github-actions[bot]` and GitHub holds every run the PR triggers until a human
+approves it (`action_required`; no job-level `if:` can prevent it), so the
+version PR carries a check that can never turn green and is finalised as a
+failure on merge even though CI never ran. When rotating the token, grant
+Contents / Pull requests / Issues read and write as described in the
+[ReleaseGraph callers doc](https://github.com/redtidev1918/releasegraph/blob/main/docs/en/callers.md).
+
 ## pub.dev publishing rules
 
 - pub.dev only accepts OIDC publishing triggered by a **git tag**. Publishing

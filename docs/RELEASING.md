@@ -22,6 +22,15 @@ pub.dev 包的 OIDC 发布触发。不要手动打发布 tag。
 6. 在 Actions 与 pub.dev 上确认发布结果；CLI Release 资产和 `SHA256SUMS` 以
    `.release-policy.yml` 的 required 清单为准。
 
+## 版本 PR 的作者与 CI
+
+版本 PR 由 release-please 用 `RELEASE_PLEASE_TOKEN` 创建，本仓库已配置该 secret。
+它缺失时作者会退化成 `github-actions[bot]`，GitHub 会扣住这个 PR 触发的每一次运行等待
+人工批准（`action_required`，job 级 `if:` 拦不住）——version PR 上因此永远挂着一个不会
+变绿的检查，合并时记为失败，而 CI 从未跑过。轮换令牌时按 ReleaseGraph 的
+[callers 文档](https://github.com/redtidev1918/releasegraph/blob/main/docs/callers.md)
+勾选 Contents / Pull requests / Issues 读写。
+
 ## pub.dev 发布硬规则
 
 - pub.dev 只接受由 **git tag 触发** 的 OIDC 发布。从 main push 直接调
