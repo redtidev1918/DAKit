@@ -199,7 +199,10 @@ void main() {
     final result = await repository.moreLikeThis('art-1');
 
     expect(transport.requests.single.path, 'browse/morelikethis/preview');
-    expect(transport.requests.single.query, <String, Object?>{'seed': 'art-1'});
+    expect(transport.requests.single.query, <String, Object?>{
+      'seed': 'art-1',
+      'mature_content': true,
+    });
     // "More from DA" first, then "More from artist", de-duplicated and without
     // the seed itself.
     expect(result.artworks.map((artwork) => artwork.id), <String>[
