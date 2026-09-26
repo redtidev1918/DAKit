@@ -462,10 +462,7 @@ final class OfficialDiscoveryRepository implements DiscoveryRepository {
     // no longer exists.
     final json = await _transport.getJson(
       ApiRoutes.moreLikeThisPreview,
-      query: <String, Object?>{
-        'seed': normalized,
-        'mature_content': true,
-      },
+      query: <String, Object?>{'seed': normalized, 'mature_content': true},
     );
     final fromDa = await _tolerantRelatedArtworks(json, 'more_from_da');
     final fromArtist = await _tolerantRelatedArtworks(json, 'more_from_artist');
