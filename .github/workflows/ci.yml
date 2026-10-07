@@ -98,7 +98,8 @@ jobs:
     if: github.event_name != 'pull_request' || github.event.pull_request.user.login != 'github-actions[bot]'
     name: macOS debug app
     needs: quality
-    runs-on: macos-15
+    # connectivity_plus 7.3 uses Network APIs introduced in the macOS 26 SDK.
+    runs-on: macos-26
     timeout-minutes: 35
     steps:
       - name: Check out source
