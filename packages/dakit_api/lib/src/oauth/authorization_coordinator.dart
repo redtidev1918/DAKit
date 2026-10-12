@@ -72,13 +72,16 @@ final class OAuthAuthorizationCoordinator {
   final DateTime Function() _now;
   final Duration timeout;
 
-  /// Bounds native cold-start link and persisted PKCE reads together. A failed
-  /// lookup leaves stored credentials untouched and allows normal app startup.
+  /// Bounds native cold-start lookup and each best-effort pending-store wait.
+  /// A failed lookup leaves credentials untouched. Pending-store operations
+  /// remain serialized after a timeout so late cleanup cannot erase a newer
+  /// transaction; live authorization can continue using its in-memory state.
   final Duration recoveryLookupTimeout;
   Future<AuthTokens>? _active;
   Completer<void>? _cancellation;
   int _authorizationGeneration = 0;
   int _launchGeneration = 0;
+  Future<void> _pendingStoreTail = Future<void>.value();
 
   bool get isAuthorizing => _active != null;
 
@@ -166,9 +169,13 @@ final class OAuthAuthorizationCoordinator {
   }
 
   Future<AuthTokens> _start() async {
+    final generation = _authorizationGeneration;
     final pending = _flow.start(config, now: _now().toUtc());
     try {
-      await _pendingStore.write(pending);
+      await _pendingOperation(() async {
+        if (generation != _authorizationGeneration) return;
+        await _pendingStore.write(pending);
+      });
     } on Object catch (error) {
       // Persisting PKCE state is recovery support, not a prerequisite for the
       // live browser flow: [pending] remains in memory until the callback is
@@ -181,6 +188,7 @@ final class OAuthAuthorizationCoordinator {
         error: error,
       );
     }
+    _ensureNotCancelled(generation);
     _record(
       DiagnosticStage.oauthLaunch,
       DiagnosticLevel.info,
@@ -408,11 +416,27 @@ final class OAuthAuthorizationCoordinator {
     required String code,
     required String message,
   }) async {
+    final generation = _authorizationGeneration;
     try {
-      await _pendingStore.clear();
+      await _pendingOperation(() async {
+        if (generation != _authorizationGeneration) return;
+        await _pendingStore.clear();
+      });
     } on Object catch (error) {
       _recordDeferredStorageFailure(code: code, message: message, error: error);
     }
+  }
+
+  Future<void> _pendingOperation(Future<void> Function() operation) {
+    final result = _pendingStoreTail.then((_) => operation());
+    // Retain the actual completion in the queue, not its timeout wrapper.
+    // Native secure-storage futures cannot be cancelled: starting a write
+    // after a timed-out clear would let that late clear delete fresh PKCE.
+    _pendingStoreTail = result.then<void>(
+      (_) {},
+      onError: (Object _, StackTrace _) {},
+    );
+    return result.timeout(recoveryLookupTimeout);
   }
 
   void _recordDeferredStorageFailure({

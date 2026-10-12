@@ -11,6 +11,86 @@ void main() {
     redirectUri: Uri.parse('dakit://oauth/callback'),
   );
 
+  test('stalled pending cleanup settles cancellation and cannot erase new PKCE', () async {
+    final blocked = Completer<void>();
+    final store = MemoryPendingStore(clearFuture: blocked.future);
+    final callbacks = FakeCallbackSource();
+    final launched = Completer<Uri>();
+    final diagnostics = MemoryDiagnostics();
+    final coordinator = buildCoordinator(
+      config: config,
+      callbacks: callbacks,
+      pendingStore: store,
+      tokenStore: MemoryTokenStore(),
+      endpoint: FakeOAuthEndpoint(),
+      launcher: FakeLauncher((uri) async {
+        launched.complete(uri);
+      }),
+      diagnostics: diagnostics,
+      now: now,
+      recoveryLookupTimeout: const Duration(milliseconds: 10),
+    );
+    await coordinator.cancelPending().timeout(const Duration(seconds: 1));
+    final authorization = coordinator.authorize();
+    final uri = await launched.future.timeout(const Duration(seconds: 1));
+    // The in-memory flow can launch, but must not write ahead of a late clear.
+    expect(store.value, isNull);
+    blocked.complete();
+    await Future<void>.delayed(Duration.zero);
+    expect(store.value?.state, uri.queryParameters['state']);
+    callbacks.add(
+      config.redirectUri.replace(
+        queryParameters: {
+          'code': 'authorization-code',
+          'state': uri.queryParameters['state']!,
+        },
+      ),
+    );
+    expect((await authorization).accessToken, 'access');
+    expect(store.value, isNull);
+    expect(
+      diagnostics.events.map((e) => e.code),
+      contains('oauth.pending_cleanup.deferred'),
+    );
+    await callbacks.controller.close();
+  });
+
+  test(
+    'stalled pending cleanup cannot block successful authorization',
+    () async {
+      final store = MemoryPendingStore(clearFuture: Completer<void>().future);
+      final callbacks = FakeCallbackSource();
+      final tokens = MemoryTokenStore();
+      final coordinator = buildCoordinator(
+        config: config,
+        callbacks: callbacks,
+        pendingStore: store,
+        tokenStore: tokens,
+        endpoint: FakeOAuthEndpoint(),
+        launcher: FakeLauncher((uri) async {
+          callbacks.add(
+            config.redirectUri.replace(
+              queryParameters: {
+                'code': 'authorization-code',
+                'state': uri.queryParameters['state']!,
+              },
+            ),
+          );
+        }),
+        now: now,
+        recoveryLookupTimeout: const Duration(milliseconds: 10),
+      );
+      expect(
+        (await coordinator.authorize().timeout(const Duration(seconds: 1)))
+            .accessToken,
+        'access',
+      );
+      expect(tokens.value?.accessToken, 'access');
+      expect(coordinator.isAuthorizing, isFalse);
+      await callbacks.controller.close();
+    },
+  );
+
   test(
     'subscribes before launch, validates callback, and persists tokens',
     () async {
@@ -667,6 +747,7 @@ final class MemoryPendingStore implements PendingAuthorizationStore {
     this.failRead = false,
     this.failWrite = false,
     this.readFuture,
+    this.clearFuture,
   });
 
   PendingAuthorization? value;
@@ -674,12 +755,14 @@ final class MemoryPendingStore implements PendingAuthorizationStore {
   final bool failRead;
   final bool failWrite;
   final Future<PendingAuthorization?>? readFuture;
+  final Future<void>? clearFuture;
   int readCount = 0;
   int clearCount = 0;
 
   @override
   Future<void> clear() async {
     clearCount += 1;
+    await clearFuture;
     if (failClear) {
       throw const DAKitException(
         kind: DAKitFailureKind.storage,
