@@ -23,6 +23,7 @@ final class DAKitOAuthClient {
     DiagnosticSink diagnostics = const NoopDiagnosticSink(),
     DateTime Function()? now,
     Duration timeout = const Duration(minutes: 10),
+    Duration recoveryLookupTimeout = const Duration(seconds: 5),
   }) {
     if (endpoint != null && networkProfile != null) {
       throw const DAKitException(
@@ -59,6 +60,7 @@ final class DAKitOAuthClient {
       diagnostics: diagnostics,
       now: now,
       timeout: timeout,
+      recoveryLookupTimeout: recoveryLookupTimeout,
     );
     return DAKitOAuthClient._(session, coordinator);
   }

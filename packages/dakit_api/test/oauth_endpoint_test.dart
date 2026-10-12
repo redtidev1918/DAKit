@@ -10,6 +10,60 @@ void main() {
   final endpoint = Uri.parse('https://www.deviantart.com/oauth2/token');
 
   test(
+    'diagnostic failure preserves a successful HTTP token response',
+    () async {
+      final dio = Dio();
+      dio.interceptors.add(
+        InterceptorsWrapper(
+          onRequest: (options, handler) {
+            handler.resolve(
+              Response<Object?>(
+                requestOptions: options,
+                statusCode: 200,
+                data: <String, Object?>{'access_token': 'access'},
+              ),
+            );
+          },
+        ),
+      );
+      final result = await DioOAuthEndpoint(
+        dio: dio,
+        diagnostics: ThrowingDiagnostics(),
+      ).postForm(endpoint, const {});
+      expect(result['access_token'], 'access');
+    },
+  );
+
+  test('diagnostic failure preserves the original HTTP error', () async {
+    final dio = Dio();
+    dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) {
+          handler.reject(
+            DioException.connectionError(
+              requestOptions: options,
+              reason: 'offline',
+            ),
+          );
+        },
+      ),
+    );
+    await expectLater(
+      DioOAuthEndpoint(
+        dio: dio,
+        diagnostics: ThrowingDiagnostics(),
+      ).postForm(endpoint, const {}),
+      throwsA(
+        isA<DAKitException>().having(
+          (error) => error.code,
+          'code',
+          'network.connection',
+        ),
+      ),
+    );
+  });
+
+  test(
     'sends OAuth fields as an URL-encoded form, not multipart data',
     () async {
       final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
@@ -210,4 +264,9 @@ void main() {
       ),
     );
   });
+}
+
+final class ThrowingDiagnostics implements DiagnosticSink {
+  @override
+  void add(DiagnosticEvent event) => throw StateError('Sink unavailable');
 }

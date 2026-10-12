@@ -1,6 +1,7 @@
 import 'package:dakit_core/dakit_core.dart';
 
 import 'oauth_config.dart';
+import 'diagnostic_sink.dart';
 import 'oauth_endpoint.dart';
 import 'pkce.dart';
 
@@ -132,7 +133,8 @@ final class OAuthTokenClient {
   };
 
   void _recordSuccess(String code, DateTime started) {
-    _diagnostics.add(
+    recordOAuthDiagnostic(
+      _diagnostics,
       DiagnosticEvent(
         stage: DiagnosticStage.tokenExchange,
         level: DiagnosticLevel.info,
@@ -144,7 +146,8 @@ final class OAuthTokenClient {
   }
 
   void _recordFailure(String code, DateTime started, Object error) {
-    _diagnostics.add(
+    recordOAuthDiagnostic(
+      _diagnostics,
       DiagnosticEvent(
         stage: DiagnosticStage.tokenExchange,
         level: DiagnosticLevel.error,
