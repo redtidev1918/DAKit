@@ -55,6 +55,12 @@ DTO 不从顶层库导出。官方响应新增未知字段不应破坏解析；�
 - 只做“session + request → DeviantArt DTO → `dakit_core` 模型”；
 - 不依赖 Flutter 或 WebView，也不拥有登录、Cookie/CSRF 刷新或会话持久化。
 
+`RfyFeedFetcher.fetch` 接受可选的 Dio `CancelToken`。宿主负责会话恢复和
+请求归属时，必须传入 `retryInvalidCsrf: false`：此模式只发送一次 RFY
+请求，不读取首页，不自行替换 CSRF。为兼容已有调用者，默认模式仍允许
+一次明确的 `HTTP 400 + errorDetails.csrf == invalid` 恢复；取消覆盖 RFY、
+首页读取和后续请求。普通 HTTP 400 不触发这项恢复。
+
 ### `dakit_flutter`
 
 - `DAKitOAuthClient` 组合常用登录生命周期；

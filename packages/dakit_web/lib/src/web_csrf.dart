@@ -20,9 +20,13 @@ final class WebCsrfFetcher {
     r"window\.__CSRF_TOKEN__ = '([^']*)'",
   );
 
-  Future<String> fetch({required String cookieHeader}) async {
+  Future<String> fetch({
+    required String cookieHeader,
+    CancelToken? cancelToken,
+  }) async {
     final response = await _dio.get<String>(
       _home.toString(),
+      cancelToken: cancelToken,
       options: Options(
         responseType: ResponseType.plain,
         headers: <String, dynamic>{
