@@ -121,7 +121,7 @@ jobs:
         run: |
           set -euo pipefail
           publish_tag() {
-            local pkg="$1" flag="$2" version tag
+            local pkg="$1" flag="$2" version tag registry_url
             if [ "$flag" != true ]; then
               return 0
             fi
@@ -131,18 +131,33 @@ jobs:
               exit 1
             fi
             tag="$pkg-v$version"
-            if git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
-              echo "tag $tag already exists"
+            registry_url="https://pub.dev/api/packages/$pkg/versions/$version"
+            if curl -fsS --connect-timeout 10 --max-time 20 "$registry_url" >/dev/null 2>&1; then
+              echo "$pkg $version is already published"
               return 0
             fi
-            git tag "$tag"
-            git push origin "$tag"
+            if git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null; then
+              echo "reusing existing immutable tag $tag"
+            else
+              git tag "$tag"
+              git push origin "$tag"
+            fi
             # GITHUB_TOKEN-created tag pushes never trigger workflows, so the
             # tag ref is dispatched explicitly; pub.dev sees refType=tag.
             gh workflow run publish-pub.yml --ref "$tag"
-            echo "pushed tag $tag"
+            # A dependent package must not publish before its new minimum
+            # dependency is actually available. Never rewrite an existing tag.
+            for attempt in $(seq 1 30); do
+              if curl -fsS --connect-timeout 10 --max-time 20 "$registry_url" >/dev/null 2>&1; then
+                echo "verified published package $pkg $version"
+                return 0
+              fi
+              sleep 10
+            done
+            echo "Timed out waiting for $pkg $version; inspect Publish Dart Packages before retrying." >&2
+            return 1
           }
           publish_tag dakit_core "$CORE"
           publish_tag dakit_api "$API"
-          publish_tag dakit_flutter "$FLUTTER"
           publish_tag dakit_web "$WEB"
+          publish_tag dakit_flutter "$FLUTTER"

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:dakit_core/dakit_core.dart';
 
 import 'oauth_config.dart';
+import 'diagnostic_sink.dart';
 import 'oauth_session.dart';
 import 'oauth_token_client.dart';
 import 'pkce.dart';
@@ -31,6 +32,7 @@ final class OAuthAuthorizationCoordinator {
     DiagnosticSink diagnostics = const NoopDiagnosticSink(),
     DateTime Function()? now,
     Duration timeout = const Duration(minutes: 10),
+    Duration recoveryLookupTimeout = const Duration(seconds: 5),
   }) => OAuthAuthorizationCoordinator._(
     config,
     launcher,
@@ -42,6 +44,7 @@ final class OAuthAuthorizationCoordinator {
     diagnostics,
     now ?? DateTime.now,
     timeout,
+    recoveryLookupTimeout,
   );
 
   OAuthAuthorizationCoordinator._(
@@ -55,6 +58,7 @@ final class OAuthAuthorizationCoordinator {
     this._diagnostics,
     this._now,
     this.timeout,
+    this.recoveryLookupTimeout,
   );
 
   final OAuthConfig config;
@@ -67,9 +71,17 @@ final class OAuthAuthorizationCoordinator {
   final DiagnosticSink _diagnostics;
   final DateTime Function() _now;
   final Duration timeout;
+
+  /// Bounds native cold-start lookup and each best-effort pending-store wait.
+  /// A failed lookup leaves credentials untouched. Pending-store operations
+  /// remain serialized after a timeout so late cleanup cannot erase a newer
+  /// transaction; live authorization can continue using its in-memory state.
+  final Duration recoveryLookupTimeout;
   Future<AuthTokens>? _active;
   Completer<void>? _cancellation;
   int _authorizationGeneration = 0;
+  int _launchGeneration = 0;
+  Future<void> _pendingStoreTail = Future<void>.value();
 
   bool get isAuthorizing => _active != null;
 
@@ -80,25 +92,31 @@ final class OAuthAuthorizationCoordinator {
   /// Returns `null` when there is nothing to resume. Hosts should call this as
   /// early as practical after constructing their callback source.
   Future<AuthTokens?> resumePending({bool waitForCallback = false}) async {
+    final expectedGeneration = _authorizationGeneration;
+    final lookupClock = Stopwatch()..start();
+    Future<T> lookup<T>(Future<T> operation) =>
+        operation.timeout(recoveryLookupTimeout - lookupClock.elapsed);
     Uri? initialCallback;
-    if (_callbacks case final InitialCallbackUriSource initialSource) {
-      final initial = await initialSource.initialUri();
-      if (initial != null && _flow.matchesRedirect(config, initial)) {
-        initialCallback = initial;
-      }
-    }
     // A normal cold start has no OAuth callback to resume. Avoid touching the
     // encrypted pending store in that path: platform key stores may prompt,
     // fail, or take seconds to become available even though no recovery work
     // is needed.
-    if (initialCallback == null && !waitForCallback) return null;
     PendingAuthorization? pending;
     try {
-      pending = await _pendingStore.read();
+      if (_callbacks case final InitialCallbackUriSource initialSource) {
+        final initial = await lookup(initialSource.initialUri());
+        if (expectedGeneration != _authorizationGeneration) return null;
+        if (initial != null && _flow.matchesRedirect(config, initial)) {
+          initialCallback = initial;
+        }
+      }
+      if (initialCallback == null && !waitForCallback) return null;
+      pending = await lookup(_pendingStore.read());
+      if (expectedGeneration != _authorizationGeneration) return null;
     } on Object catch (error) {
       _recordDeferredStorageFailure(
         code: 'oauth.pending_recovery.unavailable',
-        message: 'The callback cannot be resumed because persisted PKCE state is unavailable.',
+        message: 'Cold-start callback or persisted PKCE lookup is unavailable; existing credentials were retained.',
         error: error,
       );
       return null;
@@ -151,9 +169,13 @@ final class OAuthAuthorizationCoordinator {
   }
 
   Future<AuthTokens> _start() async {
+    final generation = _authorizationGeneration;
     final pending = _flow.start(config, now: _now().toUtc());
     try {
-      await _pendingStore.write(pending);
+      await _pendingOperation(() async {
+        if (generation != _authorizationGeneration) return;
+        await _pendingStore.write(pending);
+      });
     } on Object catch (error) {
       // Persisting PKCE state is recovery support, not a prerequisite for the
       // live browser flow: [pending] remains in memory until the callback is
@@ -166,6 +188,7 @@ final class OAuthAuthorizationCoordinator {
         error: error,
       );
     }
+    _ensureNotCancelled(generation);
     _record(
       DiagnosticStage.oauthLaunch,
       DiagnosticLevel.info,
@@ -176,8 +199,10 @@ final class OAuthAuthorizationCoordinator {
     return _waitForCallback(
       pending,
       afterListening: () async {
+        final launchGeneration = _launchGeneration;
         try {
           await _launcher.launch(pending.authorizationUri);
+          if (launchGeneration != _launchGeneration) return;
           _record(
             DiagnosticStage.oauthLaunch,
             DiagnosticLevel.info,
@@ -185,6 +210,7 @@ final class OAuthAuthorizationCoordinator {
             'The authorization request was handed to the system browser.',
           );
         } on Object catch (error) {
+          if (launchGeneration != _launchGeneration) rethrow;
           await _clearPendingBestEffort(
             code: 'oauth.pending_cleanup.deferred',
             message: 'The PKCE transaction could not be removed after the browser failed to open.',
@@ -353,15 +379,28 @@ final class OAuthAuthorizationCoordinator {
       if (initialCallback != null) {
         controller.add(initialCallback);
       }
-      await afterListening?.call();
       final cancelled = cancellation.future.then<Uri>(
         (_) => throw _cancelledAuthorization(),
       );
-      return await Future.any<Uri>(<Future<Uri>>[
-        controller.stream.first,
-        cancelled,
-      ]).timeout(wait);
+      // Attach the callback consumer before launching. Both the native launch
+      // and the callback wait belong to the same cancellable deadline; a stuck
+      // platform launch must not leave the transaction permanently active.
+      final callback = controller.stream.first;
+      final launched = Future<void>.sync(() async {
+        await afterListening?.call();
+      });
+      final completed = Future.wait<Object?>(<Future<Object?>>[
+        callback,
+        launched,
+      ], eagerError: true).then((results) => results.first! as Uri);
+      return await Future.any<Uri>(<Future<Uri>>[completed, cancelled])
+          .timeout(wait);
     } finally {
+      if (identical(_cancellation, cancellation)) {
+        // Fence detached native launch completions before another transaction
+        // can start; they must not clear its persisted PKCE state.
+        _launchGeneration += 1;
+      }
       await subscription.cancel();
       await controller.close();
     }
@@ -377,11 +416,27 @@ final class OAuthAuthorizationCoordinator {
     required String code,
     required String message,
   }) async {
+    final generation = _authorizationGeneration;
     try {
-      await _pendingStore.clear();
+      await _pendingOperation(() async {
+        if (generation != _authorizationGeneration) return;
+        await _pendingStore.clear();
+      });
     } on Object catch (error) {
       _recordDeferredStorageFailure(code: code, message: message, error: error);
     }
+  }
+
+  Future<void> _pendingOperation(Future<void> Function() operation) {
+    final result = _pendingStoreTail.then((_) => operation());
+    // Retain the actual completion in the queue, not its timeout wrapper.
+    // Native secure-storage futures cannot be cancelled: starting a write
+    // after a timed-out clear would let that late clear delete fresh PKCE.
+    _pendingStoreTail = result.then<void>(
+      (_) {},
+      onError: (Object _, StackTrace _) {},
+    );
+    return result.timeout(recoveryLookupTimeout);
   }
 
   void _recordDeferredStorageFailure({
@@ -415,7 +470,8 @@ final class OAuthAuthorizationCoordinator {
     Duration? elapsed,
     Map<String, Object?> attributes = const <String, Object?>{},
   }) {
-    _diagnostics.add(
+    recordOAuthDiagnostic(
+      _diagnostics,
       DiagnosticEvent(
         stage: stage,
         level: level,

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -21,6 +22,31 @@ class _StubAdapter implements HttpClientAdapter {
   ) async => _handler(options);
 }
 
+class _AsyncAdapter implements HttpClientAdapter {
+  _AsyncAdapter(this.handler);
+
+  final Future<ResponseBody> Function(RequestOptions options) handler;
+
+  @override
+  void close({bool force = false}) {}
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) => Future.any([
+    handler(options),
+    if (cancelFuture != null)
+      cancelFuture.then<ResponseBody>(
+        (_) => throw DioException(
+          requestOptions: options,
+          type: DioExceptionType.cancel,
+        ),
+      ),
+  ]);
+}
+
 ResponseBody _html(String body) => ResponseBody.fromString(
   body,
   200,
@@ -38,6 +64,120 @@ ResponseBody _json(Object body, {int status = 200}) => ResponseBody.fromBytes(
 );
 
 void main() {
+  final cancelled = isA<DioException>().having(
+    (error) => error.type,
+    'type',
+    DioExceptionType.cancel,
+  );
+
+  test(
+    'single-attempt mode never refreshes an explicitly rejected CSRF',
+    () async {
+      final paths = <String>[];
+      final dio = Dio()
+        ..httpClientAdapter = _StubAdapter((options) {
+          paths.add(options.uri.path);
+          return _json({
+            'errorDetails': {'csrf': 'invalid'},
+          }, status: 400);
+        });
+      await expectLater(
+        RfyFeedFetcher(dio).fetch(
+          cookieHeader: 'auth=fixture',
+          csrfToken: 'old',
+          retryInvalidCsrf: false,
+        ),
+        throwsA(isA<DioException>()),
+      );
+      expect(paths, ['/_puppy/dabrowse/networkbar/rfy/deviations']);
+    },
+  );
+
+  test('a generic HTTP 400 does not trigger a CSRF refresh', () async {
+    var calls = 0;
+    final dio = Dio()
+      ..httpClientAdapter = _StubAdapter((_) {
+        calls++;
+        return _json({'error': 'invalid_cursor'}, status: 400);
+      });
+    await expectLater(
+      RfyFeedFetcher(dio).fetch(cookieHeader: 'auth=fixture', csrfToken: 'old'),
+      throwsA(isA<DioException>()),
+    );
+    expect(calls, 1);
+  });
+
+  test('cancellation before dispatch makes no physical request', () async {
+    var calls = 0;
+    final dio = Dio()
+      ..httpClientAdapter = _StubAdapter((_) {
+        calls++;
+        return _json({'deviations': <Object?>[]});
+      });
+    final token = CancelToken()..cancel('owner superseded');
+    await expectLater(
+      RfyFeedFetcher(dio).fetch(
+        cookieHeader: 'auth=fixture',
+        csrfToken: 'old',
+        cancelToken: token,
+      ),
+      throwsA(cancelled),
+    );
+    expect(calls, 0);
+  });
+
+  for (final cancelDuringHome in [false, true]) {
+    test(
+      'cancellation during ${cancelDuringHome ? 'CSRF refresh' : 'RFY'} stops subsequent requests',
+      () async {
+        final entered = Completer<void>();
+        final pending = Completer<ResponseBody>();
+        final paths = <String>[];
+        final token = CancelToken();
+        final dio = Dio()
+          ..httpClientAdapter = _AsyncAdapter((options) {
+            paths.add(options.uri.path);
+            if (cancelDuringHome && paths.length == 1) {
+              return Future.value(
+                _json({
+                  'errorDetails': {'csrf': 'invalid'},
+                }, status: 400),
+              );
+            }
+            entered.complete();
+            return pending.future;
+          });
+        final request = RfyFeedFetcher(dio).fetch(
+          cookieHeader: 'auth=fixture',
+          csrfToken: 'old',
+          cancelToken: token,
+          retryInvalidCsrf: cancelDuringHome,
+        );
+        final result = expectLater(request, throwsA(cancelled));
+        await entered.future;
+        token.cancel('owner superseded');
+        await result;
+        pending.complete(_html("window.__CSRF_TOKEN__ = 'fresh-token'"));
+        await Future<void>.delayed(Duration.zero);
+        expect(paths, [
+          '/_puppy/dabrowse/networkbar/rfy/deviations',
+          if (cancelDuringHome) '/',
+        ]);
+      },
+    );
+  }
+
+  test('retains opaque generic-fallback cursor without session inference', () {
+    final cursor = base64Url.encode(
+      utf8.encode(jsonEncode({'vespa_content_group': 2})),
+    );
+    final page = RfyFeedFetcher.parseJson({
+      'deviations': <Object?>[],
+      'nextCursor': cursor,
+    });
+    expect(page.nextCursor, cursor);
+    expect(page.hasMore, isTrue);
+  });
   test('parses a personalized rfy/deviations payload', () {
     final page = RfyFeedFetcher.parseJson(<String, Object?>{
       'nextCursor': 'abc123',

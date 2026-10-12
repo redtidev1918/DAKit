@@ -23,6 +23,7 @@ final class DAKitOAuthClient {
     DiagnosticSink diagnostics = const NoopDiagnosticSink(),
     DateTime Function()? now,
     Duration timeout = const Duration(minutes: 10),
+    Duration recoveryLookupTimeout = const Duration(seconds: 5),
   }) {
     if (endpoint != null && networkProfile != null) {
       throw const DAKitException(
@@ -48,6 +49,7 @@ final class DAKitOAuthClient {
       store: resolvedTokenStore,
       tokenClient: tokenClient,
       now: now,
+      storeOperationTimeout: recoveryLookupTimeout,
     );
     final coordinator = OAuthAuthorizationCoordinator(
       config: config,
@@ -59,6 +61,7 @@ final class DAKitOAuthClient {
       diagnostics: diagnostics,
       now: now,
       timeout: timeout,
+      recoveryLookupTimeout: recoveryLookupTimeout,
     );
     return DAKitOAuthClient._(session, coordinator);
   }
@@ -83,11 +86,14 @@ final class DAKitOAuthClient {
     // failure to clear it (e.g. the macOS keychain denies access to an
     // unsigned host) must not block logout, otherwise the token store is left
     // intact and the user can never request fresh scopes on re-login.
-    try {
-      await authorization.cancelPending();
-    } on DAKitException {
-      // Continue to clear the session below.
-    }
-    await session.logout(revoke: revoke);
+    final pendingCleanup = authorization.cancelPending();
+    // Fence token generation synchronously, before pending native cleanup can
+    // yield. A login started while that cleanup is delayed must not be erased
+    // by an old logout that only reaches the token session several seconds later.
+    final tokenCleanup = session.logout(revoke: revoke);
+    await Future.wait<void>([
+      pendingCleanup.catchError((Object _) {}),
+      tokenCleanup,
+    ]);
   }
 }

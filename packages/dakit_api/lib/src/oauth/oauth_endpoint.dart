@@ -1,6 +1,8 @@
 import 'package:dakit_core/dakit_core.dart';
 import 'package:dio/dio.dart';
 
+import 'diagnostic_sink.dart';
+
 import '../http/network_adapter.dart';
 import '../http/network_profile.dart';
 
@@ -192,7 +194,8 @@ final class DioOAuthEndpoint implements OAuthEndpoint {
     DateTime started, {
     int? status,
   }) {
-    diagnostics.add(
+    recordOAuthDiagnostic(
+      diagnostics,
       DiagnosticEvent(
         stage: DiagnosticStage.http,
         level: level,

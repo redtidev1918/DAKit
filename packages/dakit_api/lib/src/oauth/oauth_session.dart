@@ -12,14 +12,31 @@ final class OAuthSession implements AuthTokenProvider {
     required TokenStore store,
     required OAuthTokenClient tokenClient,
     DateTime Function()? now,
-  }) => OAuthSession._(config, store, tokenClient, now ?? DateTime.now);
+    Duration storeOperationTimeout = const Duration(seconds: 5),
+  }) => OAuthSession._(
+    config,
+    store,
+    tokenClient,
+    now ?? DateTime.now,
+    storeOperationTimeout,
+  );
 
-  OAuthSession._(this.config, this._store, this._tokenClient, this._now);
+  OAuthSession._(
+    this.config,
+    this._store,
+    this._tokenClient,
+    this._now,
+    this.storeOperationTimeout,
+  );
 
   final OAuthConfig config;
   final TokenStore _store;
   final OAuthTokenClient _tokenClient;
   final DateTime Function() _now;
+
+  /// Bounds callers without releasing an unfinished native storage operation.
+  final Duration storeOperationTimeout;
+  Future<void> _storeTail = Future<void>.value();
   Future<AuthTokens>? _activeRefresh;
   Future<void>? _activeLogout;
   final StreamController<DAKitException> _invalidations =
@@ -42,7 +59,10 @@ final class OAuthSession implements AuthTokenProvider {
   Future<AuthTokens> validTokens({bool forceRefresh = false}) async {
     final expectedGeneration = _generation;
     _ensureUsable(expectedGeneration);
-    final current = await _store.read();
+    final current = await _withStore((_) async {
+      _ensureUsable(expectedGeneration);
+      return _store.read();
+    });
     _ensureUsable(expectedGeneration);
     if (current == null) {
       throw _missingSession();
@@ -54,11 +74,19 @@ final class OAuthSession implements AuthTokenProvider {
   Future<void> save(AuthTokens tokens, {int? expectedGeneration}) async {
     final expected = expectedGeneration ?? _generation;
     _ensureUsable(expected);
-    await _store.write(tokens);
-    if (_loggingOut || expected != _generation) {
-      await _store.clear();
-      throw _changedSession();
-    }
+    await _withStore((expired) async {
+      _ensureUsable(expected);
+      await _store.write(tokens);
+      if (_loggingOut || expected != _generation) {
+        // Keep obsolete-write cleanup inside the same transaction. A newer
+        // write cannot overtake this clear, even after its caller times out.
+        await _store.clear();
+        throw _changedSession();
+      }
+      // A timeout is not logout. A slow but successful same-generation write
+      // can hold a valid rotated token; retain it for subsequent recovery.
+      if (expired()) throw _storageTimeout();
+    });
   }
 
   Future<void> logout({bool revoke = true}) {
@@ -83,18 +111,18 @@ final class OAuthSession implements AuthTokenProvider {
       final refresh = _activeRefresh;
       if (refresh != null) {
         try {
-          current = await refresh;
+          current = await refresh.timeout(storeOperationTimeout);
         } on Object {
           // A generation-aware refresh is expected to abort during logout.
         }
       }
-      current ??= await _store.read();
+      current ??= await _withStore((_) => _store.read());
       if (revoke && current != null) {
         await _tokenClient.revoke(config: config, current: current);
       }
     } finally {
       try {
-        await _store.clear();
+        await _withStore((_) => _store.clear(), skipIfExpired: false);
       } finally {
         // A Keychain/storage deletion error must not poison the session
         // object forever. A later authorization still needs to save its new
@@ -139,12 +167,7 @@ final class OAuthSession implements AuthTokenProvider {
       }
       rethrow;
     }
-    _ensureUsable(expectedGeneration);
-    await _store.write(updated);
-    if (_loggingOut || expectedGeneration != _generation) {
-      await _store.clear();
-      throw _changedSession();
-    }
+    await save(updated, expectedGeneration: expectedGeneration);
     return updated;
   }
 
@@ -155,13 +178,45 @@ final class OAuthSession implements AuthTokenProvider {
     if (_loggingOut || expectedGeneration != _generation) return;
     _generation += 1;
     try {
-      await _store.clear();
+      await _withStore((_) => _store.clear(), skipIfExpired: false);
     } on Object {
       // Keep the authoritative provider error. A host can still leave its
       // authenticated UI, and the next storage read will retry the clear path.
     }
     _invalidations.add(error);
   }
+
+  Future<T> _withStore<T>(
+    Future<T> Function(bool Function() expired) operation, {
+    bool skipIfExpired = true,
+  }) {
+    var expired = false;
+    final actual = _storeTail.then((_) {
+      if (expired && skipIfExpired) throw _storageTimeout();
+      return operation(() => expired);
+    });
+    // Native operations cannot be cancelled. Queue their true completion,
+    // never the timeout wrapper, so late writes/clears stay ordered. A queued
+    // operation whose caller already failed is skipped before touching storage.
+    _storeTail = actual.then<void>(
+      (_) {},
+      onError: (Object _, StackTrace _) {},
+    );
+    return actual.timeout(
+      storeOperationTimeout,
+      onTimeout: () {
+        expired = true;
+        throw _storageTimeout();
+      },
+    );
+  }
+
+  static DAKitException _storageTimeout() => const DAKitException(
+    kind: DAKitFailureKind.storage,
+    code: 'oauth.storage.timeout',
+    message: 'OAuth secure storage did not complete before the deadline.',
+    retryable: true,
+  );
 
   void _ensureUsable(int expectedGeneration) {
     if (_loggingOut || expectedGeneration != _generation) {

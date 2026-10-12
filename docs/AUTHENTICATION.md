@@ -40,11 +40,30 @@ macOS 会把 Keychain 条目的 `kSecAttrService` 名直接显示在「…想要
 
 任何日志都不应包含 access token、refresh token、授权码、Cookie、PKCE verifier、代理密码或带签名的媒体 URL。DAKit 诊断只保留阶段、稳定错误码、耗时和经过筛选的属性。
 
+`OAuthSession.storeOperationTimeout` 默认五秒；Flutter 集成使用既有的
+`recoveryLookupTimeout` 设置该等待上限。超时报告 storage 类型的
+`oauth.storage.timeout`，不意味着凭据失效或用户退出。无法取消的原生操作
+仍保持真实完成顺序；同一 generation 的迟到成功写入保留有效凭据，
+下次恢复可读取它。只有明确退出/身份变化的过期写入才在同一事务内清理，
+避免旧写入或迟到清理覆盖新的账号。未开始且调用者已超时的读写不会执行。
+
 ## 平台回调
 
 - Android：browsable intent filter 将 `dakit://oauth/callback` 送入主 Activity；
 - macOS：`CFBundleURLTypes` 注册 `dakit` scheme；
 - Windows：MSIX manifest 注册协议，`app_links` 把新进程收到的激活转发给现有实例。
+
+Flutter Android 宿主使用 SDK 默认 `app_links` 回调源时，必须在接收回调的
+Activity 内关闭 Flutter 内置深链路由，否则同一 OAuth 回调可能同时交给
+SDK 和 Router，导致 SDK 拒绝回调后登录页仍被路由替换：
+
+```xml
+<meta-data android:name="flutter_deeplinking_enabled" android:value="false" />
+```
+
+保留 OAuth 的 browsable intent filter。SDK 负责 PKCE 验证，宿主负责页面和
+路由；该配置属于应用与插件的接口，不是 TokenStore 竞态的设备根因。
+参见 [Flutter 官方深链配置](https://docs.flutter.dev/ui/navigation/deep-linking#migrating-from-plugin-based-deep-linking)。
 
 自定义 scheme 易于集成，但任何其他应用都能尝试发起同名 URI，因此 `state`、精确 redirect 校验和短期事务缺一不可。将来如需 claimed HTTPS redirect，应由宿主平台适配器实现，不应绕开协调器验证。
 

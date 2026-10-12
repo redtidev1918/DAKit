@@ -47,6 +47,13 @@ DAKit 为第三方 Flutter 客户端提供分层 SDK。公共层描述稳定的�
 
 DTO 不从顶层库导出。官方响应新增未知字段不应破坏解析；必需字段消失时必须抛出明确 parsing failure。
 
+OAuth 协调器的 `recoveryLookupTimeout` 同时限制待授权记录的写入和
+清理等待。待授权记录仅用于进程恢复；存储卡住时，取消和已提交登录
+仍会完成，活跃登录可使用内存 PKCE。超时不会取消原生存储操作，因此
+后续写入/清理按真实完成顺序串行执行并检查事务 generation，避免迟到的
+清理删除下一次授权。OAuth token 的保存与清理失败仍按其原有契约报告，
+不因为待授权记录采用 best-effort 策略而吞掉凭据错误。
+
 `OfficialApiTransport` 提供读取扩展点，`OfficialApiMutationTransport` 额外提供统一的 URL-encoded POST。GET 会按配置退避重试 429/500/503；非幂等 POST 只会在 401 后刷新一次 token，不会自动重试可能已生效的写操作。
 
 ### `dakit_web`
@@ -54,6 +61,12 @@ DTO 不从顶层库导出。官方响应新增未知字段不应破坏解析；�
 - 可选私有网页协议适配，覆盖搜索/RFY、收藏/画廊、简介和 More Like This 等网页数据；
 - 只做“session + request → DeviantArt DTO → `dakit_core` 模型”；
 - 不依赖 Flutter 或 WebView，也不拥有登录、Cookie/CSRF 刷新或会话持久化。
+
+`RfyFeedFetcher.fetch` 接受可选的 Dio `CancelToken`。宿主负责会话恢复和
+请求归属时，必须传入 `retryInvalidCsrf: false`：此模式只发送一次 RFY
+请求，不读取首页，不自行替换 CSRF。为兼容已有调用者，默认模式仍允许
+一次明确的 `HTTP 400 + errorDetails.csrf == invalid` 恢复；取消覆盖 RFY、
+首页读取和后续请求。普通 HTTP 400 不触发这项恢复。
 
 ### `dakit_flutter`
 

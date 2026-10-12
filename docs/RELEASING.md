@@ -44,6 +44,8 @@ pub.dev 包的 OIDC 发布触发。不要手动打发布 tag。
 - `GITHUB_TOKEN` 推 tag 不会触发 workflow；Release workflow 会显式
   dispatch `publish-pub.yml` 到组件 tag ref，使 OIDC token 保持 `tag` refType。
 - 发布顺序固定为 `core → api → web → flutter`；不要重发 pub.dev 上已存在的版本。
+- Release 会等待每个精确版本在 pub.dev 可读后再派发下一个包，防止新的最低依赖尚未发布。
+  若发布失败，先检查对应的 Publish Dart Packages 运行；重试沿用已有组件 tag，不改写 tag。
 
 ## 发布前检查
 

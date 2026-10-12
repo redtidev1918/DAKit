@@ -11,6 +11,215 @@ void main() {
     redirectUri: Uri.parse('dakit://oauth/callback'),
   );
 
+  AuthTokens token(String name, {bool expired = false}) => AuthTokens(
+    accessToken: name,
+    tokenType: 'Bearer',
+    refreshToken: 'fixture-refresh',
+    expiresAt: now.add(
+      expired ? const Duration(hours: -1) : const Duration(hours: 1),
+    ),
+  );
+  final storageTimeout = isA<DAKitException>()
+      .having((e) => e.kind, 'kind', DAKitFailureKind.storage)
+      .having((e) => e.code, 'code', 'oauth.storage.timeout');
+  final changedSession = isA<DAKitException>().having(
+    (e) => e.code,
+    'code',
+    'oauth.session.changed',
+  );
+  OAuthSession controlledSession(
+    ControlledTokenStore store, {
+    OAuthEndpoint? endpoint,
+  }) => OAuthSession(
+    config: config,
+    store: store,
+    tokenClient: OAuthTokenClient(
+      endpoint: endpoint ?? FakeOAuthEndpoint([]),
+      now: () => now,
+    ),
+    now: () => now,
+    storeOperationTimeout: const Duration(milliseconds: 50),
+  );
+
+  test('issued save, logout and next save retain the new account', () async {
+    final store = ControlledTokenStore(null)..writeGate = Completer<void>();
+    final session = controlledSession(store);
+    final oldSave = session.save(token('A'), expectedGeneration: 0);
+    final oldResult = expectLater(oldSave, throwsA(changedSession));
+    await store.writeStarted.future;
+    final loggingOut = session.logout(revoke: false);
+    expect(session.generation, 1);
+    store.writeGate!.complete();
+    await oldResult;
+    await loggingOut;
+    await session.save(token('B'), expectedGeneration: 1);
+    expect(store.value?.accessToken, 'B');
+    expect(store.events, ['write:A', 'clear', 'clear', 'write:B']);
+  });
+
+  test(
+    'timed-out native write cannot overwrite or clear a newer account',
+    () async {
+      final store = ControlledTokenStore(null)..writeGate = Completer<void>();
+      final session = controlledSession(store);
+      final oldResult = expectLater(
+        session.save(token('A')),
+        throwsA(storageTimeout),
+      );
+      await store.writeStarted.future;
+      await expectLater(session.logout(revoke: false), throwsA(storageTimeout));
+      await oldResult;
+      final newSave = session.save(token('B'), expectedGeneration: 1);
+      store.writeGate!.complete();
+      await newSave;
+      expect(store.value?.accessToken, 'B');
+      expect(store.events, ['write:A', 'clear', 'clear', 'write:B']);
+    },
+  );
+
+  test('timed-out native logout clear stays ahead of a new save', () async {
+    final store = ControlledTokenStore(token('A'))
+      ..clearGate = Completer<void>();
+    final session = controlledSession(store);
+    await expectLater(session.logout(revoke: false), throwsA(storageTimeout));
+    final newSave = session.save(token('B'));
+    store.clearGate!.complete();
+    await newSave;
+    expect(store.value?.accessToken, 'B');
+    expect(store.events, ['clear', 'write:B']);
+  });
+
+  test(
+    'a timed-out queued save is skipped when native storage resumes',
+    () async {
+      final store = ControlledTokenStore(null)..writeGate = Completer<void>();
+      final session = controlledSession(store);
+      final first = expectLater(
+        session.save(token('A')),
+        throwsA(storageTimeout),
+      );
+      await store.writeStarted.future;
+      await expectLater(session.save(token('B')), throwsA(storageTimeout));
+      await first;
+      store.writeGate!.complete();
+      await session.save(token('C'));
+      expect(store.value?.accessToken, 'C');
+      expect(store.events, ['write:A', 'write:C']);
+    },
+  );
+
+  test(
+    'same-generation late save retains valid credentials after caller timeout',
+    () async {
+      final store = ControlledTokenStore(token('old'))
+        ..writeGate = Completer<void>();
+      final session = controlledSession(store);
+      await expectLater(session.save(token('new')), throwsA(storageTimeout));
+      store.writeGate!.complete();
+      expect((await session.validTokens()).accessToken, 'new');
+      expect(store.events, ['write:new']);
+      expect(session.generation, 0);
+    },
+  );
+
+  test('same-generation late refresh retains the rotated token after caller timeout', () async {
+    final store = ControlledTokenStore(token('old', expired: true))
+      ..writeGate = Completer<void>();
+    final session = controlledSession(
+      store,
+      endpoint: FakeOAuthEndpoint([
+        {
+          'access_token': 'rotated',
+          'token_type': 'Bearer',
+          'refresh_token': 'rotated-refresh',
+          'expires_in': 3600,
+        },
+      ]),
+    );
+    await expectLater(session.validTokens(), throwsA(storageTimeout));
+    store.writeGate!.complete();
+    final retained = await session.validTokens();
+    expect(retained.accessToken, 'rotated');
+    expect(retained.refreshToken, 'rotated-refresh');
+    expect(store.events, ['write:rotated']);
+    expect(session.generation, 0);
+  });
+
+  test(
+    'validTokens waits for a mutation and cannot read its stale predecessor',
+    () async {
+      final store = ControlledTokenStore(token('old'))
+        ..writeGate = Completer<void>();
+      final session = controlledSession(store);
+      final saving = session.save(token('new'));
+      await store.writeStarted.future;
+      final reading = session.validTokens();
+      store.writeGate!.complete();
+      await saving;
+      expect((await reading).accessToken, 'new');
+    },
+  );
+
+  test(
+    'hung native read is storage failure without deleting credentials',
+    () async {
+      final store = ControlledTokenStore(token('existing'))
+        ..readGate = Completer<void>();
+      final session = controlledSession(store);
+      await expectLater(session.validTokens(), throwsA(storageTimeout));
+      expect(store.value?.accessToken, 'existing');
+      expect(store.events, isEmpty);
+      store.readGate!.complete();
+      expect((await session.validTokens()).accessToken, 'existing');
+    },
+  );
+
+  test(
+    'storage write failure does not poison subsequent transactions',
+    () async {
+      final store = ControlledTokenStore(null)..failNextWrite = true;
+      final session = controlledSession(store);
+      await expectLater(session.save(token('failed')), throwsStateError);
+      await session.save(token('replacement'));
+      expect((await session.validTokens()).accessToken, 'replacement');
+    },
+  );
+
+  test(
+    'logout during issued refresh write does not deadlock or clear next login',
+    () async {
+      final store = ControlledTokenStore(token('old', expired: true))
+        ..writeGate = Completer<void>();
+      final session = controlledSession(
+        store,
+        endpoint: FakeOAuthEndpoint([
+          {
+            'access_token': 'refreshed',
+            'token_type': 'Bearer',
+            'expires_in': 3600,
+          },
+        ]),
+      );
+      final refreshing = expectLater(
+        session.validTokens(),
+        throwsA(changedSession),
+      );
+      await store.writeStarted.future;
+      final loggingOut = session.logout(revoke: false);
+      store.writeGate!.complete();
+      await refreshing;
+      await loggingOut;
+      await session.save(token('replacement'));
+      expect(store.value?.accessToken, 'replacement');
+      expect(store.events, [
+        'write:refreshed',
+        'clear',
+        'clear',
+        'write:replacement',
+      ]);
+    },
+  );
+
   test('public code exchange sends PKCE and no client secret', () async {
     final endpoint = FakeOAuthEndpoint(<Map<String, Object?>>[
       <String, Object?>{
@@ -356,4 +565,39 @@ final class FailingClearTokenStore extends MemoryTokenStore {
 
   @override
   Future<void> clear() => throw StateError('keychain denied deletion');
+}
+
+final class ControlledTokenStore extends MemoryTokenStore {
+  ControlledTokenStore(super.value);
+  Completer<void>? writeGate;
+  Completer<void>? clearGate;
+  Completer<void>? readGate;
+  final writeStarted = Completer<void>();
+  final events = <String>[];
+  bool failNextWrite = false;
+
+  @override
+  Future<AuthTokens?> read() async {
+    await readGate?.future;
+    return value;
+  }
+
+  @override
+  Future<void> write(AuthTokens tokens) async {
+    if (!writeStarted.isCompleted) writeStarted.complete();
+    await writeGate?.future;
+    if (failNextWrite) {
+      failNextWrite = false;
+      throw StateError('synthetic write failure');
+    }
+    value = tokens;
+    events.add('write:${tokens.accessToken}');
+  }
+
+  @override
+  Future<void> clear() async {
+    await clearGate?.future;
+    value = null;
+    events.add('clear');
+  }
 }

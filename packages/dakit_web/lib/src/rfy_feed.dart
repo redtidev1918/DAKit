@@ -19,29 +19,48 @@ final class RfyFeedFetcher {
     'https://www.deviantart.com/_puppy/dabrowse/networkbar/rfy/deviations',
   );
 
+  /// Fetches a page with an optional caller-owned cancellation token.
+  ///
+  /// Set [retryInvalidCsrf] to false when the host owns session recovery and
+  /// physical request tracing. This then performs exactly one RFY request and
+  /// never fetches the home page or replaces the supplied CSRF token.
+  /// The default retains one refresh retry for an explicit CSRF rejection.
   Future<Page<Artwork>> fetch({
     required String cookieHeader,
     required String csrfToken,
     String? cursor,
+    CancelToken? cancelToken,
+    bool retryInvalidCsrf = true,
   }) async {
     try {
-      return await _fetchOnce(csrfToken, cookieHeader, cursor);
+      return await _fetchOnce(csrfToken, cookieHeader, cursor, cancelToken);
     } on DioException catch (error) {
       // The persisted token can belong to an older browser context after an
       // app update; DeviantArt then answers 400 with `csrf: invalid`. Scrape a
       // fresh token from the home page with the exact Cookie header we send.
-      if (error.response?.statusCode != 400) rethrow;
+      if (!retryInvalidCsrf || !_isInvalidCsrf(error)) rethrow;
+      if (cancelToken?.cancelError case final error?) throw error;
       final matchingCsrf = await WebCsrfFetcher(_dio)
-          .fetch(cookieHeader: cookieHeader);
+          .fetch(cookieHeader: cookieHeader, cancelToken: cancelToken);
       if (matchingCsrf.isEmpty || matchingCsrf == csrfToken) rethrow;
-      return await _fetchOnce(matchingCsrf, cookieHeader, cursor);
+      if (cancelToken?.cancelError case final error?) throw error;
+      return await _fetchOnce(matchingCsrf, cookieHeader, cursor, cancelToken);
     }
+  }
+
+  static bool _isInvalidCsrf(DioException error) {
+    if (error.response?.statusCode != 400) return false;
+    final data = error.response?.data;
+    if (data is! Map) return false;
+    final details = data['errorDetails'];
+    return details is Map && details['csrf'] == 'invalid';
   }
 
   Future<Page<Artwork>> _fetchOnce(
     String csrfToken,
     String cookieHeader,
     String? cursor,
+    CancelToken? cancelToken,
   ) async {
     final response = await _dio.get<Object?>(
       _endpoint.toString(),
@@ -50,6 +69,7 @@ final class RfyFeedFetcher {
         if (cursor != null && cursor.isNotEmpty) 'cursor': cursor,
       },
       options: webSessionOptions(cookieHeader),
+      cancelToken: cancelToken,
     );
     return parseJson(response.data);
   }
