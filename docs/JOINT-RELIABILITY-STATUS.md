@@ -1,5 +1,16 @@
 # Joint reliability checkpoint — 2026-10-12
 
+Latest implementation `2590cbec59e0193d231addc73b3373cbe2b9b88e`: full TokenStore
+transactions are serialized; bounded storage callers do not release pending native
+I/O. A timeout alone retains successfully persisted same-generation credentials.
+Composite logout fences tokens before pending PKCE cleanup. Public-session A/logout/B/
+late-A deletion race reproduced and fixed; not asserted as incident-phone cause.
+CI 38240753370 PASS: 262 tests, analyze, Android/Windows/macOS example builds.
+DAViewer integration has 488 passing tests with this exact SDK pin and removes its
+duplicate logout fallback. Replacement joint three-platform CI is pending. No SDK
+version/publication has occurred. Prepare the API/Flutter dependency floor in the
+ReleaseGraph version PR only after joint gates pass. See downstream STATUS.
+
 Workspace `D:\Code\DAKit`, branch `codex/oauth-lifecycle-reliability`.
 Baseline `a1db839392c973a5fdae83cbc6705047fdab0741`; latest implementation
 `feec94f09c1f6b12628a099fe374e6ebafb3e9df`. This document's commit follows it;
