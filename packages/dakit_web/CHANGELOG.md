@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.3.0](https://github.com/redtidev1918/DAKit/compare/dakit_web-v0.2.5...dakit_web-v0.3.0) (2026-10-12)
+
+
+### Features
+
+* make OAuth lifecycle and RFY transport reliable ([c43e6a1](https://github.com/redtidev1918/DAKit/commit/c43e6a12393d27c20488a3ad38c8d5731a816194))
+* **web:** map premium and tier locks for website deviations ([e738d54](https://github.com/redtidev1918/DAKit/commit/e738d54d7dd2557cda8b9eff23ab7c910da364d2))
+
+
+### Bug Fixes
+
+* **release:** widen internal dakit_core constraints for the 2.0.0 release ([#44](https://github.com/redtidev1918/DAKit/issues/44)) ([5b15497](https://github.com/redtidev1918/DAKit/commit/5b15497322634f3b02f33211ae715f0150970ba2))
+
 ## 0.2.5 (2026-09-22)
 
 - Map premium folder, `tierAccess`, and blocked flags from website payloads

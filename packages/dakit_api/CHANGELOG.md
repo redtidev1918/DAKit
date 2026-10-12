@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.2.0](https://github.com/redtidev1918/DAKit/compare/dakit_api-v1.1.1...dakit_api-v1.2.0) (2026-10-12)
+
+
+### Features
+
+* make OAuth lifecycle and RFY transport reliable ([c43e6a1](https://github.com/redtidev1918/DAKit/commit/c43e6a12393d27c20488a3ad38c8d5731a816194))
+
+
+### Bug Fixes
+
+* **release:** widen internal dakit_core constraints for the 2.0.0 release ([#44](https://github.com/redtidev1918/DAKit/issues/44)) ([5b15497](https://github.com/redtidev1918/DAKit/commit/5b15497322634f3b02f33211ae715f0150970ba2))
+
 ## [1.1.1](https://github.com/redtidev1918/dakit/compare/dakit_api-v1.1.0...dakit_api-v1.1.1) (2026-09-22)
 
 ### Bug Fixes

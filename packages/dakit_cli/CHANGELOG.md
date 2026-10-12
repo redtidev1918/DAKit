@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.2](https://github.com/redtidev1918/DAKit/compare/dakit_cli-v0.4.1...dakit_cli-v0.4.2) (2026-10-12)
+
+
+### Bug Fixes
+
+* **release:** widen internal dakit_core constraints for the 2.0.0 release ([#44](https://github.com/redtidev1918/DAKit/issues/44)) ([5b15497](https://github.com/redtidev1918/DAKit/commit/5b15497322634f3b02f33211ae715f0150970ba2))
+
 ## [0.4.1](https://github.com/redtidev1918/dakit/compare/dakit_cli-v0.4.0...dakit_cli-v0.4.1) (2026-09-07)
 
 
