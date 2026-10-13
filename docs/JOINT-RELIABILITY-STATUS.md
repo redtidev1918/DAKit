@@ -80,3 +80,17 @@ OAuth credentials or original-device logs were used to invent passing verificati
 
 Before handoff update this checkpoint, downstream STATUS and exact commits/results.
 Do not expand this P0 work into unrelated SDK/module redesign.
+# 2026-10-13 publication recovery checkpoint
+
+Branch `codex/release-publication-recovery` starts at release merge
+`f89938b08f5dd985524ccbe26e62c5a5d250091e`. PRs 42/43/44 are merged.
+pub.dev still serves core 1.1.0, api 1.1.1, web 0.2.5, flutter 1.0.0.
+Release 38254995130 failed CLI finalize because 0.4.2 was not Latest; subsequent
+manual runs skipped component publication. Do not report SDK publication complete.
+Recovery patch permits explicit main repair dispatch (never dry-run publication)
+and raises flutter's API minimum to 1.2.0 for its new constructor parameters.
+Local analyze PASS; full 262 tests PASS on the release source plus this patch.
+Next: CI/review recovery PR, repair CLI Latest metadata, run the supported Release
+repair workflow and verify exact pub.dev versions before downstream hosted updates.
+DAViewer integration 43fe8bf joint CI 38243805269 PASS. Original phone PENDING.
+
