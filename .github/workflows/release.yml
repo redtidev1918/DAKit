@@ -99,7 +99,8 @@ jobs:
   tag-pub-components:
     needs: [release, detect-pub]
     if: >-
-      github.event_name == 'push' &&
+      (github.event_name == 'push' ||
+       (github.event_name == 'workflow_dispatch' && inputs.repair && !inputs.dry_run)) &&
       github.ref == 'refs/heads/main' &&
       (needs.detect-pub.outputs.core == 'true' ||
        needs.detect-pub.outputs.api == 'true' ||
