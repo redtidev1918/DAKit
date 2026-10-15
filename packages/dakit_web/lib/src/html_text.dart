@@ -13,7 +13,7 @@ String htmlToPlainText(String html) {
   // Block boundaries become newlines so paragraphs stay readable.
   text = text.replaceAll(RegExp(r'<br\s*/?>', caseSensitive: false), '\n');
   text = text.replaceAll(
-    RegExp(r'</(p|div|li|h[1-6]|tr)>', caseSensitive: false),
+    RegExp(r'</(p|div|li|h[1-6]|tr|blockquote)>', caseSensitive: false),
     '\n',
   );
   // Strip remaining tags and decode the common entities.
@@ -40,49 +40,12 @@ String htmlToPlainText(String html) {
 /// `deviation/content` `original_markup` field, or `descriptionText.html.markup`
 /// when its type is `tiptap`), which DeviantArt uses for descriptions when the
 /// rendered `html` field is empty.
-String tiptapToPlainText(String json) {
-  try {
-    final decoded = jsonDecode(json);
-    // Some payloads wrap the doc as {"version":..., "document":{...}}.
-    Object? document = decoded;
-    if (decoded is Map && decoded['document'] is Map) {
-      document = decoded['document'];
-    }
-    final buffer = StringBuffer();
-    _walkTiptap(document, buffer);
-    return buffer.toString().replaceAll(RegExp(r'\n{3,}'), '\n\n').trim();
-  } on Object {
-    return '';
-  }
-}
-
-void _walkTiptap(Object? node, StringBuffer buffer) {
-  if (node is Map) {
-    final type = node['type'];
-    final text = node['text'];
-    if (type == 'text' && text is String) {
-      buffer.write(text);
-    } else if (type == 'hardBreak') {
-      buffer.write('\n');
-    }
-    final content = node['content'];
-    if (content is List) {
-      for (final child in content) {
-        _walkTiptap(child, buffer);
-      }
-    }
-    if (type == 'paragraph' ||
-        type == 'heading' ||
-        type == 'listItem' ||
-        type == 'blockquote') {
-      buffer.write('\n');
-    }
-  } else if (node is List) {
-    for (final child in node) {
-      _walkTiptap(child, buffer);
-    }
-  }
-}
+///
+/// Derived from [tiptapToHtml] so both converters agree about visible text by
+/// construction: inline nodes the HTML walker labels (mentions, literature
+/// embeds, videos) keep those labels, and nodes that render only as images
+/// leave no whitespace hole behind.
+String tiptapToPlainText(String json) => htmlToPlainText(tiptapToHtml(json));
 
 /// Converts a tiptap document JSON string into an HTML fragment, preserving
 /// inline marks (bold/italic/underline/link) and rendering embedded
