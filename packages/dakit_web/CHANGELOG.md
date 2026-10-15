@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/redtidev1918/DAKit/compare/dakit_web-v0.3.0...dakit_web-v0.3.1) (2026-10-15)
+
+
+### Bug Fixes
+
+* **web:** keep tiptap inline node labels in plain text ([#49](https://github.com/redtidev1918/DAKit/issues/49)) ([9914fb4](https://github.com/redtidev1918/DAKit/commit/9914fb445451b24dec60085b547680f864881910)), closes [#48](https://github.com/redtidev1918/DAKit/issues/48)
+
 ## [0.3.0](https://github.com/redtidev1918/DAKit/compare/dakit_web-v0.2.5...dakit_web-v0.3.0) (2026-10-12)
 
 
