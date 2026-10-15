@@ -1,0 +1,17 @@
+{
+  "formatVersion": 1,
+  "status": "design-seed",
+  "cases": [
+    {
+      "id": "anonymous-home-20261013",
+      "evidenceKind": "captured-and-sanitized",
+      "sample": "samples/deviantart-home-anonymous.html",
+      "sampleSha256": "a98f9eb283bdde0e10511d61af5b15c23214f940b68b052bf648ff5c39c7087b",
+      "provenance": "samples/deviantart-home-evidence.md",
+      "expected": {
+        "identity": "anonymous",
+        "username": null
+      }
+    }
+  ]
+}
