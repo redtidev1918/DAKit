@@ -15,7 +15,7 @@ environment:
 
 dependencies:
   dakit_core: ">=1.0.0 <3.0.0"
-  crypto: ^3.0.7
+  crypto: ^3.0.8
   dio: ^5.11.1
 
 dev_dependencies:
