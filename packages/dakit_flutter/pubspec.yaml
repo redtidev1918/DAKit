@@ -15,15 +15,15 @@ environment:
   flutter: ">=3.47.1"
 
 dependencies:
-  app_links: ^7.2.1
+  app_links: ^7.2.2
   dakit_api: ">=1.2.0 <2.0.0"
   dakit_core: ">=1.0.0 <3.0.0"
-  background_downloader: ^9.6.3
+  background_downloader: ^9.6.5
   flutter:
     sdk: flutter
   flutter_secure_storage: ^10.0.0
   path_provider: ^2.1.5
-  url_launcher: ^6.3.2
+  url_launcher: ^6.3.3
 
 dev_dependencies:
   flutter_test:
